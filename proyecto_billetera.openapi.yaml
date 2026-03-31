@@ -1,0 +1,463 @@
+openapi: 3.0.1
+info:
+  title: proyecto_billetera
+  description: ''
+  version: 1.0.0
+tags: []
+paths:
+  /wallets:
+    post:
+      summary: Create Wallet
+      deprecated: false
+      description: ''
+      operationId: createWallet
+      tags: []
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WalletSchemaRequest'
+            examples: {}
+        required: true
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WalletSchemaResponse'
+          headers: {}
+      security: []
+  /wallets/{walletId}:
+    delete:
+      summary: Delete Wallet
+      deprecated: false
+      description: ''
+      operationId: deleteWallet
+      tags: []
+      parameters:
+        - name: walletId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: ''
+          headers: {}
+      security: []
+    get:
+      summary: Find Wallet
+      deprecated: false
+      description: ''
+      operationId: findWallet
+      tags: []
+      parameters:
+        - name: walletId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WalletSchemaResponse'
+          headers: {}
+      security: []
+  /payments:
+    post:
+      summary: Create Payment
+      deprecated: false
+      description: ''
+      operationId: createPayment
+      tags: []
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentSchemaRequest'
+            examples: {}
+        required: true
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentSchemaResponse'
+          headers: {}
+      security: []
+  /payments/{paymentId}:
+    delete:
+      summary: Delete Payment
+      deprecated: false
+      description: ''
+      operationId: deletePayment
+      tags: []
+      parameters:
+        - name: paymentId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: ''
+          headers: {}
+      security: []
+    get:
+      summary: Find Payment
+      deprecated: false
+      description: ''
+      operationId: deletePayment
+      tags: []
+      parameters:
+        - name: paymentId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentSchemaResponse'
+          headers: {}
+      security: []
+  /wallet-transaction:
+    post:
+      summary: Create Wallet Transaction
+      deprecated: false
+      description: ''
+      operationId: createWalletTransaction
+      tags: []
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WalletTransactionSchemaRequest'
+            examples: {}
+        required: true
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WalletTransactionSchemaResponse'
+          headers: {}
+      security: []
+  /wallet-transaction/{walletTransactionId}:
+    delete:
+      summary: Delete Wallet Transaction
+      deprecated: false
+      description: ''
+      operationId: deletePayment
+      tags: []
+      parameters:
+        - name: walletTransactionId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: ''
+          headers: {}
+      security: []
+  /wallet-transaction/wallet/{walletId}:
+    get:
+      summary: Find Wallet Transaction
+      deprecated: false
+      description: ''
+      operationId: deletePayment
+      tags: []
+      parameters:
+        - name: walletId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WalletTransactionListSchemaResponse'
+          headers: {}
+      security: []
+  /wallet-ux/wallet/{walletId}:
+    get:
+      summary: Find UX Wallet
+      deprecated: false
+      description: ''
+      operationId: findWalletUX
+      tags: []
+      parameters:
+        - name: walletId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Wallet:
+                    $ref: '#/components/schemas/WalletSchemaResponse'
+                  WalletTransaction:
+                    $ref: '#/components/schemas/WalletTransactionListSchemaResponse'
+                required:
+                  - Wallet
+                  - WalletTransaction
+          headers: {}
+      security: []
+  /wallet-ux/wallet:
+    post:
+      summary: Create UX Wallet
+      deprecated: false
+      description: ''
+      operationId: createWalletUX
+      tags: []
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WalletSchemaRequest'
+            examples: {}
+        required: true
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WalletSchemaResponse'
+          headers: {}
+      security: []
+  /wallet-ux/my-wallet/{walletId}:
+    delete:
+      summary: Delete UX Wallet
+      deprecated: false
+      description: ''
+      operationId: findWalletUX
+      tags: []
+      parameters:
+        - name: walletId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: ''
+          headers: {}
+      security: []
+  /wallet-ux/my-wallet/{walletId}/payment:
+    post:
+      summary: Create Payment UX Wallet
+      deprecated: false
+      description: ''
+      operationId: createPaymentWalletUX
+      tags: []
+      parameters:
+        - name: walletId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentSchemaRequest'
+            examples: {}
+        required: true
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentSchemaResponse'
+          headers: {}
+      security: []
+components:
+  schemas:
+    WalletSchemaResponse:
+      type: object
+      properties:
+        WalletId:
+          type: integer
+          format: int64
+        DocumentNumber:
+          type: string
+        DocumentType:
+          type: string
+        Currency:
+          type: string
+        WalletStatus:
+          type: string
+        DailyLimit:
+          type: string
+      required:
+        - WalletId
+        - DocumentNumber
+        - DocumentType
+        - Currency
+        - WalletStatus
+        - DailyLimit
+    WalletSchemaRequest:
+      type: object
+      properties:
+        DocumentNumber:
+          type: string
+        DocumentType:
+          type: string
+        Currency:
+          type: string
+        WalletStatus:
+          type: string
+        DailyLimit:
+          type: string
+      required:
+        - DocumentNumber
+        - DocumentType
+        - Currency
+        - WalletStatus
+        - DailyLimit
+    WalletTransactionSchemaResponse:
+      type: object
+      properties:
+        WalletTransactionId:
+          type: string
+          format: uuid
+        WalletId:
+          type: integer
+        Amount:
+          type: number
+        PreviousBalance:
+          type: number
+        NewBalance:
+          type: number
+        PaymentId:
+          type: integer
+          format: int64
+        Currency:
+          type: string
+      required:
+        - WalletTransactionId
+        - Amount
+        - PreviousBalance
+        - NewBalance
+        - Currency
+        - WalletId
+        - PaymentId
+    WalletTransactionSchemaRequest:
+      type: object
+      properties:
+        WalletId:
+          type: integer
+        Amount:
+          type: number
+        PreviousBalance:
+          type: number
+        NewBalance:
+          type: number
+        PaymentId:
+          type: integer
+          format: int64
+        Currency:
+          type: string
+      required:
+        - Amount
+        - PreviousBalance
+        - NewBalance
+        - Currency
+        - WalletId
+        - PaymentId
+    PaymentSchemaRequest:
+      type: object
+      properties:
+        PaymentStatus:
+          type: integer
+        FromWalletId:
+          type: integer
+          format: int64
+        ToWalletId:
+          type: integer
+          format: int64
+        Amount:
+          type: number
+        Currency:
+          type: string
+      required:
+        - PaymentStatus
+        - FromWalletId
+        - ToWalletId
+        - Amount
+        - Currency
+    PaymentSchemaResponse:
+      type: object
+      properties:
+        PaymentId:
+          type: integer
+          format: int64
+        PaymentStatus:
+          type: integer
+        FromWalletId:
+          type: integer
+          format: int64
+        ToWalletId:
+          type: integer
+          format: int64
+        Amount:
+          type: number
+        Currency:
+          type: string
+      required:
+        - PaymentId
+        - PaymentStatus
+        - FromWalletId
+        - ToWalletId
+        - Amount
+        - Currency
+    WalletTransactionListSchemaResponse:
+      type: array
+      items:
+        $ref: '#/components/schemas/WalletTransactionSchemaResponse'
+  responses: {}
+  securitySchemes: {}
+servers: []
+security: []

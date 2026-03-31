@@ -1,0 +1,150 @@
+﻿# .gitignore para proyectos C# / .NET
+# Basado en plantillas habituales para Visual Studio, .NET Core y editores comunes.
+
+# Visual Studio
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Build results
+[Bb]in/
+[Oo]bj/
+build/
+
+# Editor directories
+.vscode/
+.idea/
+*.idea/
+*.iws
+
+# Rider / IDE files
+*.sln.iml
+
+# NuGet
+*.nupkg
+packages/
+.nuget/packages/
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# Dotnet tool cache
+.dotnet/tools/
+
+# Publish output
+publish/
+
+# MSTest, NUnit, xUnit
+TestResults/
+*.trx
+
+# ASP.NET Scaffolding
+ScaffoldingReadMe.txt
+
+# User-specific files
+*.rsuser
+*.userprefs
+*.pidb
+*.svclog
+*.pdb
+
+# Logs
+*.log
+logs/
+
+# Runtime files
+*.exe
+*.dll
+*.app
+*.so
+*.dylib
+
+# Database
+*.mdf
+*.ldf
+*.db
+*.sqlite
+
+# Entity Framework
+# Si quieres mantener migraciones en git, elimina o ajusta la siguiente línea
+Migrations/
+
+# Azure
+secrets.json
+.local.settings.json
+
+# Configuration files that may contain secrets (común en desarrollo)
+appsettings.Development.json
+
+# Coverage and test reports
+coverage*/
+coverage/
+*.coverage
+*.coveragexml
+
+# Visual Studio Code workspace settings (user-specific)
+.vscode/*
+!.vscode/extensions.json
+
+# Package distribution
+*.vsix
+
+# Frontend/node artifacts (si están en el repositorio)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Temporary files
+*.tmp
+*.temp
+~$*
+
+# Ignore generated files by tooling
+.generated/
+
+# Microservices / containers / orchestration (Docker, K8s, Helm, CI artifacts)
+# Docker: ignore override and generated compose files and local docker helper folders
+docker-compose.override.yml
+docker-compose.*.yml
+.docker/
+**/.docker/
+
+# Docker image build folders (local caches/artifacts)
+docker-images/
+
+# Environment and secrets commonly used in microservices
+.env
+.env.*
+secrets.env
+secrets/*.json
+*.key
+*.pem
+*.pfx
+
+# Kubernetes / Helm: ignore local kubeconfigs and packaged charts
+*.kubeconfig
+kubeconfig
+kube-*
+*.tgz
+charts/*.tgz
+
+# Helm debug / local temp
+helm-debug/
+.release/
+
+# Terraform state and cache (si se usa infra-as-code)
+*.tfstate
+*.tfstate.*
+.terraform/
+
+# CI/CD local artifacts
+.pipeline/
+ci-artifacts/
+
+# Frontend build output (cuando microservicios incluyen UI)
+dist/
+
+# End of .gitignore
