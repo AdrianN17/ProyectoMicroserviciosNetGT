@@ -5,7 +5,6 @@ CREATE TABLE Wallet (
                         WalletId INT IDENTITY(1,1) PRIMARY KEY,
                         DocumentNumber VARCHAR(255),
                         DocumentType INT,
-                        Currency INT,
                         Status INT,
                         CreatedAt DATETIME,
                         UpdatedAt DATETIME,
@@ -24,7 +23,6 @@ CREATE TABLE WalletTransaction (
                                    NewBalance DECIMAL(18,2),
                                    PaymentId INT,
                                    Currency INT,
-                                   Status INT,
                                    CreatedAt DATETIME,
                                    UpdatedAt DATETIME,
 
@@ -37,6 +35,7 @@ CREATE TABLE WalletTransaction (
 -- =========================
 CREATE TABLE WalletLimit (
                              WalletLimitId INT IDENTITY(1,1) PRIMARY KEY,
+                             Currency INT,
                              DailyLimit DECIMAL(18,2)
 );
 
