@@ -7,8 +7,10 @@ namespace WalletService.Domain.Common
         private static readonly Regex _phoneRegex = new(@"^[+]?\d{7,15}$", RegexOptions.Compiled);
 
         public string Number { get; }
-
-        public PhoneNumber(string number)
+        
+        private PhoneNumber() { }
+        
+        public static Email Create(string number)
         {
             if (string.IsNullOrWhiteSpace(number)) throw new ArgumentException("Phone number is required", nameof(number));
             var cleaned = number.Trim();

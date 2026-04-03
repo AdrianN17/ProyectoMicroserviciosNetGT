@@ -1,6 +1,6 @@
 ﻿namespace WalletService.Domain.Common
 {
-    public abstract class AggregateRoot<TId, TUser> : AuditableEntity<TId, TUser>
+    public abstract class AggregateRoot<TId> : AuditableEntity<TId>
     {
         private readonly List<DomainEvent> _domainEvents = new();
 

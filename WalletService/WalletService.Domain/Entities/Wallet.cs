@@ -1,29 +1,27 @@
 ﻿namespace WalletService.Domain.Common;
 
-public class Wallet : AggreateRoot<WalletId, string>
+public class Wallet : AggreateRoot<WalletId>
 {
     public string Name { get; private set; } = default!; //obligatorio
     public string LastName { get; private set; } = default!;  //obligatorio
     public string FullName => $"{Name} {LastName}".Trim();  //obligatorio
-    public Email? Email { get; private set; } //opcionalo
-    public PhoneNumber? Phone { get; private set; } //opcional
+    public Email Email { get; private set; } //obligatorio
+    public PhoneNumber Phone { get; private set; } //obligatorio
     public WalletLimit Limit { get; private set; } //obligatorio
     
     public DocumentId Document { get; private set; } //obligatori
     
     public WalletStatus Status  { get; set; }
 
-    public bool IsMailVerified { get; private set; } = false;
-
     private Wallet()
     {
     }
     
     public static Wallet Create(string name, string lastName, DocumentType documentType, string documentNumber, 
-        string? email = null, string? phone = null, CurrencyType currency = default, decimal dailyLimit = 0m, WalletLimitId? walletLimitId = null)
+        string email, string phone, CurrencyType currency, decimal dailyLimit, WalletLimitId? walletLimitId = null)
     {
         // Validaciones básicas de campos requeridos
-        var errors = ValidateFieldsRequired(name, lastName, documentType, documentNumber, currency, dailyLimit);
+        var errors = ValidateFieldsRequired(name, lastName, documentType, documentNumber, email, phone, currency, dailyLimit);
 
         if (errors.Any())
             throw new ValidationException(errors);
@@ -33,8 +31,8 @@ public class Wallet : AggreateRoot<WalletId, string>
             Id = new WalletId(documentNumber),
             Name = name.Trim(),
             LastName = lastName.Trim(),
-            Email = email is null ? null : Email.Create(email),
-            Phone = phone is null ? null : new PhoneNumber(phone),
+            Email = Email.Create(email),
+            Phone = PhoneNumber.Create(phone),
             Limit = WalletLimit.Create(currency, dailyLimit, walletLimitId),
             Document = DocumentId.Create(documentType, documentNumber),
             Status = WalletStatus.OPERATIVE
@@ -44,7 +42,7 @@ public class Wallet : AggreateRoot<WalletId, string>
     }
 
     private static Dictionary<string, string[]> ValidateFieldsRequired(string name, string lastName, DocumentType documentType, 
-        string documentNumber, CurrencyType currency, decimal dailyLimit)
+        string documentNumber, string email, string phone, CurrencyType currency, decimal dailyLimit)
     {
         var errors = new Dictionary<string, string[]>();
 
@@ -60,6 +58,15 @@ public class Wallet : AggreateRoot<WalletId, string>
 
         if (string.IsNullOrWhiteSpace(documentNumber))
             errors["documentNumber"] = new[] { "El número de documento es requerido." };
+
+        // Validación de email
+        if (string.IsNullOrWhiteSpace(email))
+            errors["email"] = new[] { "El email es requerido." };
+
+        // Validación de phone
+        if (string.IsNullOrWhiteSpace(phone))
+            errors["phone"] = new[] { "El teléfono es requerido." };
+        
         
         // Validación de límite / moneda
         if (!Enum.IsDefined(typeof(CurrencyType), currency) || currency.Equals(default(CurrencyType)))
@@ -67,14 +74,6 @@ public class Wallet : AggreateRoot<WalletId, string>
 
         if (dailyLimit <= 0m)
             errors["limit.dailyLimit"] = new[] { "El límite diario debe ser mayor a 0." };
-        else if ((dailyLimit % 500m) != 0m)
-        {
-            // Añadir al mismo campo si ya hay mensajes
-            if (errors.ContainsKey("limit.dailyLimit"))
-                errors["limit.dailyLimit"] = errors["limit.dailyLimit"].Concat(new[] { "El límite diario debe ser múltiplo de 500." }).ToArray();
-            else
-                errors["limit.dailyLimit"] = new[] { "El límite diario debe ser múltiplo de 500." };
-        }
         
         return errors;
     }
@@ -108,7 +107,6 @@ public class Wallet : AggreateRoot<WalletId, string>
         var emailNew = Email.Create(email);
         if (emailNew.Equals(Email)) return; 
         Email = emailNew;
-        IsMailVerified = false;
         SetModified(modifiedBy);
     }
 
