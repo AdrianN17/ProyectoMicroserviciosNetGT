@@ -9,4 +9,4 @@ public sealed record CreateWalletCommand(
     string Phone, 
     string Currency, 
     decimal DailyLimit
-)
+) : IRequest<ErrorOr<Guid>>;

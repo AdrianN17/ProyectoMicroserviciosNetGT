@@ -38,7 +38,7 @@ public sealed class UpdateWalletCommandHandler : IRequestHandler<UpdateCustomerC
             request.Phone, 
             currency, 
             request.DailyLimit,
-            request.DailyLimitId
+            request.WalletLimitId
         );
         
         _walletRepository.UpdateAsync(wallet);

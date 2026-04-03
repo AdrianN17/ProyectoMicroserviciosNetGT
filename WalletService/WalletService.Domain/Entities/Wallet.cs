@@ -2,41 +2,74 @@
 
 public class Wallet : AggreateRoot<WalletId>
 {
-    public string Name { get; private set; } = default!; //obligatorio
-    public string LastName { get; private set; } = default!;  //obligatorio
-    public string FullName => $"{Name} {LastName}".Trim();  //obligatorio
-    public Email Email { get; private set; } //obligatorio
-    public PhoneNumber Phone { get; private set; } //obligatorio
-    public WalletLimit Limit { get; private set; } //obligatorio
+    public string Name { get; private set; } = default!;
+    public string LastName { get; private set; } = default!;  
+    public Email Email { get; private set; } 
+    public PhoneNumber Phone { get; private set; } 
+    public WalletLimit Limit { get; private set; } 
     
-    public DocumentId Document { get; private set; } //obligatori
+    public DocumentId Document { get; private set; } 
     
-    public WalletStatus Status  { get; set; }
+    public WalletStatus Status  { get; private set; } 
+    
+    private WalletLimit WalletLimit { get; private set; } 
 
     private Wallet()
     {
     }
     
     public static Wallet Create(string name, string lastName, DocumentType documentType, string documentNumber, 
-        string email, string phone, CurrencyType currency, decimal dailyLimit, WalletLimitId? walletLimitId = null)
+        string email, string phone, CurrencyType currency, decimal dailyLimit, )
     {
-        // Validaciones básicas de campos requeridos
-        var errors = ValidateFieldsRequired(name, lastName, documentType, documentNumber, email, phone, currency, dailyLimit);
+        var errors = ValidateFieldsRequired(name, lastName, documentType, documentNumber, email, phone);
 
         if (errors.Any())
             throw new ValidationException(errors);
 
-        var wallet = new Wallet
+        var wallet = new Wallet();
+        try
         {
-            Id = new WalletId(documentNumber),
-            Name = name.Trim(),
-            LastName = lastName.Trim(),
-            Email = Email.Create(email),
-            Phone = PhoneNumber.Create(phone),
-            Limit = WalletLimit.Create(currency, dailyLimit, walletLimitId),
-            Document = DocumentId.Create(documentType, documentNumber),
-            Status = WalletStatus.OPERATIVE
-        };
+
+            var walletId = WalletId.NewId();
+
+            var walletLimit = WalletLimit.Create(
+                walletId,
+                currency,
+                dailyLimit
+            );
+
+            wallet = new Wallet
+            {
+                Id = walletId
+                Name = name.Trim(),
+                LastName = lastName.Trim(),
+                Email = Email.Create(email),
+                Phone = PhoneNumber.Create(phone),
+                Limit = WalletLimit.Create(currency, dailyLimit, walletLimitId),
+                Document = DocumentId.Create(documentType, documentNumber),
+                Status = WalletStatus.OPERATIVE,
+                WalletLimit = walletLimit
+            };
+        }
+        catch (InvalidValueObjectException iv)
+        {
+            var prefix = iv.Code switch
+            {
+                "document.invalid" => "documentNumber",
+                "currency.invalid" => "currency",
+                _ => ""
+            };
+
+            var errorsVo = iv.Errors.ToDictionary(k => $"{prefix}", v => v.Value);
+
+            //foreach (var kv in DomainErrors.Prefix($"{prefix}", iv.Errors))
+            foreach (var kv in errorsVo)
+                errors[kv.Key] = kv.Value;
+
+        }
+
+        if (errors.Count > 0)
+                throw new DomainValidationException("wallet.invalid", "Domain validation failed", errors);
 
         return wallet;
     }
@@ -67,65 +100,46 @@ public class Wallet : AggreateRoot<WalletId>
         if (string.IsNullOrWhiteSpace(phone))
             errors["phone"] = new[] { "El teléfono es requerido." };
         
-        
-        // Validación de límite / moneda
-        if (!Enum.IsDefined(typeof(CurrencyType), currency) || currency.Equals(default(CurrencyType)))
-            errors["limit.currency"] = new[] { "El tipo de moneda es requerido y debe ser válido." };
-
-        if (dailyLimit <= 0m)
-            errors["limit.dailyLimit"] = new[] { "El límite diario debe ser mayor a 0." };
-        
         return errors;
     }
     
-    public void ChangeName(string name, string modifiedBy)
+    public void ChangeName(string name)
     {
         EnsureOperative();
-        if (string.IsNullOrWhiteSpace(name)) throw new BusinessRuleViolationException("customer.name.required", "El nombre es obligatorio");
+        if (string.IsNullOrWhiteSpace(name)) throw new BusinessRuleViolationException("wallet.name.required", "El nombre es obligatorio");
         Name = name.Trim();
-        SetModified(modifiedBy);
+        SetModified();
     }
 
-    public void ChangeLastName(string lastName, string modifiedBy)
+    public void ChangeLastName(string lastName)
     {
         EnsureOperative();
-        if (string.IsNullOrWhiteSpace(lastName)) throw new BusinessRuleViolationException("customer.lastName.required", "El nombre es obligatorio");
+        if (string.IsNullOrWhiteSpace(lastName)) throw new BusinessRuleViolationException("wallet.lastName.required", "El nombre es obligatorio");
         LastName = lastName.Trim();
-        SetModified(modifiedBy);
+        SetModified();
     }
     
-    public void ChangeDocument(DocumentType type, string number, string modifiedBy)
+    public void ChangeDocument(DocumentType type, string number)
     {
         EnsureOperative();
         Document = DocumentId.Create(type, number);
-        SetModified(modifiedBy);
+        SetModified();
     }
     
-    public void ChangeEmail(string email, string modifiedBy)
+    public void ChangeEmail(string email)
     {
         EnsureOperative();
         var emailNew = Email.Create(email);
         if (emailNew.Equals(Email)) return; 
         Email = emailNew;
-        SetModified(modifiedBy);
+        SetModified();
     }
 
-    public void ChangePhone(string phone, string modifiedBy)
+    public void ChangePhone(string phone)
     {
         EnsureOperative();
         Phone = new PhoneNumber(phone);
-        SetModified(modifiedBy);
-    }
-
-    public void ChangeLimit(CurrencyType currency, decimal dailyLimit, string modifiedBy)
-    {
-        EnsureOperative();
-        
-        if (dailyLimit <= 0) throw new BusinessRuleViolationException("wallet.limit.invalid", "El límite debe ser un valor positivo.");
-        if ((dailyLimit % 500m) != 0m) throw new BusinessRuleViolationException("wallet.limit.invalid", "El límite debe ser múltiplo de 500.");
-
-        Limit = WalletLimit.Create(currency, dailyLimit, Limit.WalletLimitId);
-        SetModified(modifiedBy);
+        SetModified();
     }
     
     private void EnsureOperative()
@@ -134,18 +148,18 @@ public class Wallet : AggreateRoot<WalletId>
             throw new InvalidDomainStateException("wallet.status.suspended", "La billetera no está activo para esta operación.");
     }
     
-    public void Operative(string modifiedBy)
+    public void Operative()
     {
         if (Status == WalletStatus.OPERATIVE) return;
         Status = WalletStatus.OPERATIVE;
-        SetModified(modifiedBy);
+        SetModified();
     }
 
-    public void Duspended(string modifiedBy)
+    public void Duspended()
     {
         if (Status != WalletStatus.OPERATIVE)
             throw new InvalidDomainStateException("wallet.status.suspended", "Solo un cliente activo puede desactivarse.");
         Status = WalletStatus.SUSPENDED;
-        SetModified(modifiedBy);
+        SetModified();
     }
 }

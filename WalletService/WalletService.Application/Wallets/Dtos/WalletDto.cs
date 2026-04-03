@@ -8,7 +8,7 @@ public record WalletDto(
     string DocumentNumber, 
     string Email, 
     string Phone, 
+    string Status,
     string Currency, 
-    decimal DailyLimit,
-    Guid DailyLimitId
+    decimal DailyLimit
 )

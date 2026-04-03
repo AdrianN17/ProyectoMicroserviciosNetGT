@@ -2,14 +2,25 @@
 -- WALLET
 -- =========================
 CREATE TABLE Wallet (
-                        WalletId INT IDENTITY(1,1) PRIMARY KEY,
-                        DocumentNumber VARCHAR(255),
+                        WalletId GUID PRIMARY KEY,
+                        Name varchar(50),
+                        LastName varchar(50),
+                        Email varchar(100),
+                        Phone varchar(9),
+                        DocumentNumber VARCHAR(20),
                         DocumentType INT,
                         Status INT,
                         CreatedAt DATETIME,
                         UpdatedAt DATETIME,
                         WalletStatus INT,
                         TypeWalletLimit INT
+);
+
+CREATE TABLE WalletLimit (
+                             WalletLimitId GUID PRIMARY KEY,
+                             WalletId GUID,   
+                             Currency INT,
+                             DailyLimit DECIMAL(18,2)
 );
 
 -- =========================
@@ -33,11 +44,7 @@ CREATE TABLE WalletTransaction (
 -- =========================
 -- WALLET LIMIT
 -- =========================
-CREATE TABLE WalletLimit (
-                             WalletLimitId INT IDENTITY(1,1) PRIMARY KEY,
-                             Currency INT,
-                             DailyLimit DECIMAL(18,2)
-);
+
 
 -- =========================
 -- PAYMENT
