@@ -9,7 +9,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WalletUXService.Application
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WalletUXService.Domain", "WalletUXService.Domain\WalletUXService.Domain.csproj", "{0CC54122-9E3E-413E-BA64-4FCB724FBDF7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WalletUXService.Infraestructure", "WalletUXService.Infraestructure\WalletUXService.Infraestructure.csproj", "{E835848C-74FF-429A-B6C7-3E01A74D6002}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WalletUXService.Infrastructure", "WalletUXService.Infrastructure\WalletUXService.Infrastructure.csproj", "{E835848C-74FF-429A-B6C7-3E01A74D6002}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

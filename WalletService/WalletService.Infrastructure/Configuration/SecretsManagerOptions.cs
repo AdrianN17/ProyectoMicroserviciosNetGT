@@ -1,5 +1,4 @@
-﻿
-namespace CustomerService.Infrastructure.Configuration
+﻿namespace WalletService.Infrastructure.Configuration
 {
     public sealed class SecretsManagerOptions
     {

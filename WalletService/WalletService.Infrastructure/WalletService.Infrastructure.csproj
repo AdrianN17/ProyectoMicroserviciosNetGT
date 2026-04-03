@@ -1,0 +1,45 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Compile Remove="Security\VaultConfigurationExtension.cs" />
+        <Compile Remove="Security\VaultOptions.cs" />
+        <Compile Remove="Security\VaultSecretProvider.cs" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Folder Include="Messaging\" />
+        <Folder Include="Persistence\Interceptors\" />
+        <Folder Include="Persistence\Factories\" />
+        <Folder Include="Security\" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="AWSSDK.Extensions.NETCore.Setup" Version="4.0.3.24" />
+        <PackageReference Include="AWSSDK.SecretsManager" Version="4.0.4.8" />
+        <PackageReference Include="MediatR" Version="14.0.0" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.3" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.3">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.3" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.3">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="10.0.3" />
+        <PackageReference Include="VaultSharp" Version="1.17.5.1" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\WalletService.Application\WalletService.Application.csproj" />
+        <ProjectReference Include="..\WalletService.Domain\WalletService.Domain.csproj" />
+    </ItemGroup>
+
+</Project>

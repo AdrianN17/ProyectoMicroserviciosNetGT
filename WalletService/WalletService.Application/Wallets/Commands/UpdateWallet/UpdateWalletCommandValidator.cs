@@ -28,10 +28,6 @@ public class UpdateWalletCommandValidator : AbstractValidator<UpdateWalletComman
             .MaximumLength(20).WithMessage("El número de documento no puede exceder los 50 caracteres.")
             .MustAsync(async (docNumber, cancellationToken) => !await BeUniqueDocumentNumber(docNumber, cancellationToken)).WithMessage("El número de documento ya existe.");
 
-        RuleFor(x => x.DocumentType)
-            .NotEmpty().WithMessage("El tipo de documento es requerido")
-            .MustAsync(IsNotValidDocumentType).WithMessage("El tipo de documento no es válido.");
-        
         RuleFor(x => x)
             .Must((x) => IsValidDocumentNumber(x.DocumentNumber, x.DocumentType)).WithMessage("El número de documento no es válido para el tipo de documento especificado.")
             .OverridePropertyName($"documentNumber");
@@ -53,8 +49,8 @@ public class UpdateWalletCommandValidator : AbstractValidator<UpdateWalletComman
             .GreaterThan(0m).WithMessage("El límite diario debe ser mayor a 0.")
             .Must(d => (d % 500m) == 0m).WithMessage("El límite diario debe ser múltiplo de 500.");
         
-        RuleFor(x => x.DailyLimitId)
-            .NotEmpty().WithMessage("El Identificador de daily limit es requerido.")
+        RuleFor(x => x.WalletLimitId)
+            .NotEmpty().WithMessage("El Identificador de daily limit es requerido.");
     }
     
     private async Task<bool> BeUniqueDocumentNumber(string documentNumber, CancellationToken cancellationToken)

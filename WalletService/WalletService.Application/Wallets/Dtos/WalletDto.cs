@@ -10,5 +10,6 @@ public record WalletDto(
     string Phone, 
     string Status,
     string Currency, 
-    decimal DailyLimit
-)
+    decimal DailyLimit,
+    Guid DailyLimitId
+);

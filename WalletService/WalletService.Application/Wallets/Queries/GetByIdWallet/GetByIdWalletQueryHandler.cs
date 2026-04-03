@@ -1,5 +1,5 @@
-﻿using WalletService.Application.Wallets.Dtos;
-using WalletService.Domain.Enums;
+﻿﻿using WalletService.Application.Wallets.Dtos;
+using WalletService.Domain.Common;
 using ErrorOr;
 using MediatR;
 
@@ -21,19 +21,18 @@ public sealed class GetByIdWalletQueryHandler : IRequestHandler<GetByIdWalletQue
             return Error.NotFound("Wallet.NotFound", $"Wallet with id {request.WalletId} not found.");
         }
 
-        return new WalletDto
-        {
-            WalletId = wallet!.Id.Value,
-            Name = wallet.Name,
-            LastName = wallet.LastName,
-            DocumentType = wallet.Document.Type.ToString(),
-            DocumentNumber = wallet.Document.Number,
-            Email = wallet.Email,
-            Phone = wallet.Phone,
-            Currency = wallet.WalletLimit.Currency.ToString(),
-            DailyLimit = wallet.WalletLimit.DailyLimit,
-            DailyLimitId = wallet.WalletLimit.Id.Value,
-            WalletStatus = wallet.Status.ToString()
-        };
+        return new WalletDto(
+            wallet!.Id.Value,
+            wallet.Name,
+            wallet.LastName,
+            wallet.Document.Type.ToString(),
+            wallet.Document.Number,
+            wallet.Email.ToString(),
+            wallet.Phone.ToString(),
+            wallet.WalletStatus.ToString(),
+            wallet.Limit.Currency.ToString(),
+            wallet.Limit.DailyLimit,
+            wallet.Limit.Id.Value
+        );
     }
 }

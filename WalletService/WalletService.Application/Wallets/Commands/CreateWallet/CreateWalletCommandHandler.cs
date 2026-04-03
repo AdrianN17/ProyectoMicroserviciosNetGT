@@ -5,8 +5,9 @@ using WalletService.Application.Common.Helpers;
 using ErrorOr;
 using MediatR;
 using Microsoft.Extensions.Logging;
+using WalletService.Domain.Enums;
 
-public sealed class CreateWalletCommandHandler : IRequestHandler<CreateCustomerCommand, ErrorOr<Guid>>
+public sealed class CreateWalletCommandHandler : IRequestHandler<CreateWalletCommand, ErrorOr<Guid>>
 {
     private readonly IWalletRepository _walletRepository;
     private readonly IUnitOfWork _unitOfWork;
@@ -21,13 +22,13 @@ public sealed class CreateWalletCommandHandler : IRequestHandler<CreateCustomerC
     
     public async Task<ErrorOr<Guid>> Handle(CreateWalletCommand request, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Creating wallet with document number {DocumentNumber}", command.DocumentNumber);
+        _logger.LogInformation("Creating wallet with document number {DocumentNumber}", request.DocumentNumber);
 
-        if (!EnumParsing.TryParseEnum<DocumentType>(command.DocumentType, out var documentType))
-            return Error.Validation(code: "DocumentType.Invalid", description: $"DocumentType '{command.DocumentType}' no es válido.");
+        if (!EnumParsing.TryParseEnum<DocumentType>(request.DocumentType, out var documentType))
+            return Error.Validation(code: "DocumentType.Invalid", description: $"DocumentType '{request.DocumentType}' no es válido.");
         
-        if (!EnumParsing.TryParseEnum<CurrencyType>(command.Currency, out var currency))
-            return Error.Validation(code: "CurrencyType.Invalid", description: $"CurrencyType '{command.Currency}' no es válido.");
+        if (!EnumParsing.TryParseEnum<CurrencyType>(request.Currency, out var currency))
+            return Error.Validation(code: "CurrencyType.Invalid", description: $"CurrencyType '{request.Currency}' no es válido.");
         
         var wallet = Wallet.Create(
             request.Name, 
@@ -40,7 +41,7 @@ public sealed class CreateWalletCommandHandler : IRequestHandler<CreateCustomerC
             request.DailyLimit
         );
         
-        _walletRepository.CreateAsync(wallet);
+        await _walletRepository.CreateAsync(wallet);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         return wallet.Id.Value;

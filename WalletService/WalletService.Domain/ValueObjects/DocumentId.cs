@@ -1,4 +1,6 @@
-﻿namespace WalletService.Domain.Common;
+﻿namespace WalletService.Domain.ValueObjects;
+
+using WalletService.Domain.Enums;
 
 public record DocumentId
 {

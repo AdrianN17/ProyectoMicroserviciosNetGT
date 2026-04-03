@@ -9,7 +9,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WalletTransactionService.Ap
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WalletTransactionService.Domain", "WalletTransactionService.Domain\WalletTransactionService.Domain.csproj", "{5D2FF7E1-CCFF-4EC3-BFF6-051C4570A510}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WalletTransactionService.Infraestructure", "WalletTransactionService.Infraestructure\WalletTransactionService.Infraestructure.csproj", "{488FB3FE-63E4-46A7-BAF0-B2EB9EC080F5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WalletTransactionService.Infrastructure", "WalletTransactionService.Infrastructure\WalletTransactionService.Infrastructure.csproj", "{488FB3FE-63E4-46A7-BAF0-B2EB9EC080F5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

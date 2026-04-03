@@ -16,6 +16,9 @@ namespace WalletService.Infrastructure.Persistence.Contexts
             _publisher = publisher;
         }
 
+        public DbSet<Wallet> Wallets { get; set; }
+        public DbSet<WalletLimit> WalletsLimit { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             var assembly = typeof(ApplicationDbContext).Assembly;
@@ -59,7 +62,7 @@ namespace WalletService.Infrastructure.Persistence.Contexts
         private async Task DistpatchDomainEventsAsync(CancellationToken cancellationToken)
         {
             var domainEntities = ChangeTracker
-                .Entries<AggregateRoot<string, string>>()
+                .Entries<AggregateRoot<string>>()
                 .Where(e => e.Entity.DomainEvents != null && e.Entity.DomainEvents.Any())
                 .ToList();
 

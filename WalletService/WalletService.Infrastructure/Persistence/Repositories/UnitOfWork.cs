@@ -1,8 +1,7 @@
-﻿
-using CustomerService.Application.Commmon.Interfaces;
-using CustomerService.Infrastructure.Persistence.Contexts;
+﻿using WalletService.Application.Commmon.Interfaces;
+using WalletService.Infrastructure.Persistence.Contexts;
 
-namespace CustomerService.Infrastructure.Persistence.Repositories
+namespace WalletService.Infrastructure.Persistence.Repositories
 {
     public class UnitOfWork : IUnitOfWork
     {

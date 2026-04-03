@@ -1,5 +1,4 @@
-﻿
-using WalletService.Domain.Interfaces;
+﻿using WalletService.Domain.Interfaces;
 using WalletService.Infrastructure.Persistence.Contexts;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,9 +13,9 @@ namespace WalletService.Infrastructure.Persistence.Repositories
             _dbContext = dbContext;
         }
 
-        public void CreateAsync(Wallet wallet)
+        public async Task CreateAsync(Wallet wallet)
         {
-            _dbContext.Wallets.Add(wallet);
+            await _dbContext.Wallets.AddAsync(wallet);
         }
 
         public Task DeleteAsync(WalletId id, CancellationToken cancellationToken = default)
@@ -32,19 +31,20 @@ namespace WalletService.Infrastructure.Persistence.Repositories
 
             return await _dbContext.Wallets.AsNoTracking()
                 .Where(e => e.Document.Number == documentNumber)
-                .AnyAsync();
+                .AnyAsync(cancellationToken);
         }
 
-        public async Task<Customer?> GetByIdAsync(WalletId id, CancellationToken cancellationToken = default)
+        public async Task<Wallet?> GetByIdAsync(WalletId id, CancellationToken cancellationToken = default)
         {
             return await _dbContext.Wallets
-                .Include(a => a.Address)
+                .Include(a => a.WalletLimit)
                 .FirstOrDefaultAsync(e => e.Id == id);
         }
 
-        public Task UpdateAsync(Wallet wallet, CancellationToken cancellationToken = default)
+        public async Task UpdateAsync(Wallet wallet, CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            _dbContext.Wallets.Update(wallet);
+            await Task.CompletedTask;
         }
     }
 }

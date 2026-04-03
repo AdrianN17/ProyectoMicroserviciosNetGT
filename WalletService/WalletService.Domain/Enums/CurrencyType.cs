@@ -1,4 +1,4 @@
-﻿namespace WalletService.Domain.Common;
+﻿namespace WalletService.Domain.Enums;
 
 public enum CurrencyType
 {

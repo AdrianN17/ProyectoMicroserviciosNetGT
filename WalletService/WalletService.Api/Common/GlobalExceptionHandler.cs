@@ -1,12 +1,12 @@
-﻿using CustomerService.Application.Common.Exceptions;
-using CustomerService.Domain.Exceptions;
+﻿using WalletService.Application.Common.Exceptions;
+using WalletService.Domain.Exceptions;
 using FluentValidation;
 using Microsoft.AspNetCore.Components.Routing;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 
-namespace CustomerService.Api.Common
+namespace WalletService.Api.Common
 {
     public sealed class GlobalExceptionHandler : IExceptionHandler
     {

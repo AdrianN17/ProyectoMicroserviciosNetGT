@@ -1,7 +1,7 @@
-﻿namespace WalletService.Domain.Common;
+﻿namespace WalletService.Domain.ValueObjects;
 
-public readonly record struct WalletId(Guid value)
+public readonly record struct WalletId(Guid Value)
 {
     public static WalletId NewId() => new(Guid.NewGuid());
-    public override string ToString() => value.ToString();
+    public override string ToString() => Value.ToString();
 }

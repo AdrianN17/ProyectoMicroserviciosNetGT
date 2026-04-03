@@ -50,7 +50,7 @@ namespace WalletService.Infrastructure
                 options.UseSqlServer(connectionString);
             });
 
-            services.AddScoped<ICustomerRepository, CustomerRepository>();
+            services.AddScoped<IWalletRepository, WalletRepository>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 
             return services;    

@@ -1,13 +1,12 @@
-﻿
-using CustomerService.Application.Abstractions.Secrets;
-using CustomerService.Infrastructure.Caching;
-using CustomerService.Infrastructure.Providers;
+﻿using WalletService.Application.Abstractions.Secrets;
+using WalletService.Infrastructure.Caching;
+using WalletService.Infrastructure.Providers;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using VaultSharp;
 using VaultSharp.V1.AuthMethods.Token;
 
-namespace CustomerService.Infrastructure.Configuration
+namespace WalletService.Infrastructure.Configuration
 {
     public static class VaultConfigurationExtension
     {

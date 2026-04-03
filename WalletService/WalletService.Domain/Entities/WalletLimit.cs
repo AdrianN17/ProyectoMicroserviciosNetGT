@@ -1,15 +1,17 @@
 ﻿namespace WalletService.Domain.Entities;
 
+using WalletService.Domain.Enums;
+
 public sealed class WalletLimit : AuditableEntity<WalletLimitId>
 {
     public WalletId WalletId { get; private set; }
     public Wallet Wallet { get; private set; } = default!;
-    public CurrencyType Currency { get; init; }
-    public decimal DailyLimit { get; init; }
+    public CurrencyType Currency { get; private set; }
+    public decimal DailyLimit { get; private set; }
     
     private WalletLimit() { }
     
-    public static WalletLimit Create(Guid walletId, CurrencyType currency, 
+    public static WalletLimit Create(WalletId walletId, CurrencyType currency, 
         decimal dailyLimit)
     {
         var errors_fields = ValidateFieldsRequired(walletId, currency, dailyLimit);
@@ -27,7 +29,8 @@ public sealed class WalletLimit : AuditableEntity<WalletLimitId>
         {
             walletLimit = new WalletLimit()
             {
-                WalletLimitId = walletLimitId ?? new WalletLimitId(Guid.NewGuid().ToString()),
+                Id = WalletLimitId.NewId(),
+                WalletId = walletId,
                 Currency = currency,
                 DailyLimit = dailyLimit
             };
@@ -42,7 +45,6 @@ public sealed class WalletLimit : AuditableEntity<WalletLimitId>
 
             var errorsVo = iv.Errors.ToDictionary(k => $"{prefix}", v => v.Value);
 
-            //foreach (var kv in DomainErrors.Prefix($"{prefix}", iv.Errors))
             foreach (var kv in errorsVo)
                 errors[kv.Key] = kv.Value;
                 
@@ -54,11 +56,11 @@ public sealed class WalletLimit : AuditableEntity<WalletLimitId>
         return walletLimit;
     }
 
-    private static Dictionary<string, string[]> ValidateFieldsRequired(Guid walletId, CurrencyType currency, decimal dailyLimit)
+    private static Dictionary<string, string[]> ValidateFieldsRequired(WalletId walletId, CurrencyType currency, decimal dailyLimit)
     {
         var errors = new Dictionary<string, string[]>();
 
-        if (walletId == Guid.Empty)
+        if (walletId.Value == Guid.Empty)
             errors["walletId"] = new[] { "El identificador de la wallet es requerido." };
     
         if (!Enum.IsDefined(typeof(CurrencyType), currency) || currency.Equals(default(CurrencyType)))
@@ -90,7 +92,7 @@ public sealed class WalletLimit : AuditableEntity<WalletLimitId>
     {
         if (!Enum.IsDefined(typeof(CurrencyType), currency) || currency.Equals(default(CurrencyType)))
             throw new BusinessRuleViolationException("wallet.currency.invalid", "El tipo de moneda es inválido.");
-        Currency = currency
+        Currency = currency;
         SetModified();
     }
 }

@@ -1,6 +1,6 @@
 ﻿using System.Text.RegularExpressions;
 
-namespace WalletService.Domain.Common
+namespace WalletService.Domain.ValueObjects
 {
     public sealed class Email : ValueObject
     {

@@ -1,10 +1,10 @@
 ﻿using Amazon.SecretsManager;
-using CustomerService.Application.Abstractions.Secrets;
-using CustomerService.Infrastructure.Providers;
+using WalletService.Application.Abstractions.Secrets;
+using WalletService.Infrastructure.Providers;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace CustomerService.Infrastructure.Configuration
+namespace WalletService.Infrastructure.Configuration
 {
     public static class SecretsManagerConfigurationExtension
     {

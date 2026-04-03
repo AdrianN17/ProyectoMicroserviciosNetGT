@@ -1,6 +1,7 @@
-﻿// csharp
+﻿﻿// csharp
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using WalletService.Domain.Entities;
 
 namespace WalletService.Infrastructure.Persistence.Configurations
 {
@@ -13,7 +14,7 @@ namespace WalletService.Infrastructure.Persistence.Configurations
             builder.HasKey(c => c.Id).HasName("PK_Wallet");
 
             builder.Property(c => c.Id)
-                .HasConversion(new CustomerIdConversion())
+                .HasConversion(new WalletIdConversion())
                 .HasColumnType("uniqueidentifier")
                 .ValueGeneratedNever()
                 .HasColumnName("WalletId");
@@ -52,25 +53,9 @@ namespace WalletService.Infrastructure.Persistence.Configurations
 
             builder.Property(c => c.Phone)
                 .IsRequired()
-                .HasConversion(v => v!.Number, v => new PhoneNumber(v))
+                .HasConversion(v => v!.Number, v => PhoneNumber.Create(v))
                 .HasColumnName("Phone")
-                .HasColumnType("varchar(9)");
-
-            builder.Property(c => c.Status)
-                .IsRequired()
-                .HasConversion<int>()
-                .HasColumnType("int")
-                .HasColumnName("Status");
-
-            builder.Property(c => c.CreatedAt)
-                .IsRequired()
-                .HasColumnType("datetime")
-                .HasColumnName("CreatedAt");
-
-            builder.Property(c => c.UpdatedAt)
-                .IsRequired()
-                .HasColumnType("datetime")
-                .HasColumnName("UpdatedAt");
+                .HasColumnType("varchar(15)");
 
             builder.Property(c => c.WalletStatus)
                 .IsRequired()
@@ -78,12 +63,23 @@ namespace WalletService.Infrastructure.Persistence.Configurations
                 .HasColumnType("int")
                 .HasColumnName("WalletStatus");
 
+            builder.Property(c => c.CreatedAt)
+                .IsRequired()
+                .HasColumnType("datetime")
+                .HasColumnName("CreatedAt");
+
+            builder.Property(c => c.LastModifiedAt)
+                .IsRequired()
+                .HasColumnType("datetime")
+                .HasColumnName("LastModifiedAt");
+
+            // Relación con WalletLimit
             builder.HasOne(w => w.Limit)
                 .WithOne(l => l.Wallet)
                 .HasForeignKey<WalletLimit>(l => l.WalletId)
                 .IsRequired()
                 .OnDelete(DeleteBehavior.Cascade)
-                .HasConstraintName("FK_WalletLimit_Wallet")
+                .HasConstraintName("FK_WalletLimit_Wallet");
         }
     }
 }

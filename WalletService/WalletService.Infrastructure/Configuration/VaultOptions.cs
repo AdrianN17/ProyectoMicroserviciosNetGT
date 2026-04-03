@@ -1,4 +1,4 @@
-﻿namespace CustomerService.Infrastructure.Configuration
+﻿namespace WalletService.Infrastructure.Configuration
 {
     public class VaultOptions
     {

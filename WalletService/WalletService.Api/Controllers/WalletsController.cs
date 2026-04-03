@@ -1,10 +1,8 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using WalletService.Application.Customers.Queries.GetCustomerAddressById;
-using WalletService.Application.Customers.Commands.CreateCustomer;
-using WalletService.Application.Customers.Dtos;
-using WalletService.Application.Customers.Queries.GetByIdCustomer;
-using WalletService.Application.Customers.Commands.AddCustomerAddress;
+using WalletService.Application.Wallets.Commands.CreateWallet;
+using WalletService.Application.Wallets.Dtos;
+using WalletService.Application.Wallets.Queries.GetByIdWallet;
 using WalletService.Api.Common;
 
 namespace WalletService.Api.Controllers
@@ -31,7 +29,7 @@ namespace WalletService.Api.Controllers
             );
         }
 
-        [HttpGet("{walletId:guid}", Name = "Customer_GetById")]
+        [HttpGet("{walletId:guid}", Name = "Wallet_GetById")]
         public async Task<IActionResult> GetById(Guid walletId)
         {
             var result = await _mediator.Send(new GetByIdWalletQuery(walletId));

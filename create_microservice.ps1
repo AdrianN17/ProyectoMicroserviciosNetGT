@@ -50,7 +50,7 @@ Write-Host "Creando carpeta raíz: $root"
 New-Item -ItemType Directory -Path $root | Out-Null
 Push-Location $root
 
-$projects = @("Api", "Application", "Domain", "Infraestructure")
+$projects = @("Api", "Application", "Domain", "Infrastructure")
 
 foreach ($p in $projects) {
     $projName = "$Name.$p"

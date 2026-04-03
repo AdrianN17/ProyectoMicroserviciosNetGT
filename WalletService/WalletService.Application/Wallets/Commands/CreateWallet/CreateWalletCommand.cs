@@ -1,4 +1,7 @@
-﻿namespace WalletService.Application.Wallets.Commands.CreateWallet;
+﻿using MediatR;
+using ErrorOr;
+
+namespace WalletService.Application.Wallets.Commands.CreateWallet;
 
 public sealed record CreateWalletCommand(
     string Name, 

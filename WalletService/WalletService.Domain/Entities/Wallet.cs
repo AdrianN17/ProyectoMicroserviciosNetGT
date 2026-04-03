@@ -1,53 +1,51 @@
-﻿namespace WalletService.Domain.Common;
+﻿namespace WalletService.Domain.Entities;
 
-public class Wallet : AggreateRoot<WalletId>
+using WalletService.Domain.Enums;
+
+public class Wallet : AggregateRoot<WalletId>
 {
     public string Name { get; private set; } = default!;
     public string LastName { get; private set; } = default!;  
-    public Email Email { get; private set; } 
-    public PhoneNumber Phone { get; private set; } 
-    public WalletLimit Limit { get; private set; } 
-    
-    public DocumentId Document { get; private set; } 
-    
-    public WalletStatus Status  { get; private set; } 
-    
-    private WalletLimit WalletLimit { get; private set; } 
+    public Email Email { get; private set; } = default!;
+    public PhoneNumber Phone { get; private set; } = default!;
+    public WalletLimit Limit { get; private set; } = default!;
+
+    public DocumentId Document { get; private set; } = default!;
+
+    public WalletStatus WalletStatus  { get; private set; }
+
+    public WalletLimit WalletLimit { get; set; } = default!;
 
     private Wallet()
     {
     }
     
     public static Wallet Create(string name, string lastName, DocumentType documentType, string documentNumber, 
-        string email, string phone, CurrencyType currency, decimal dailyLimit, )
+        string email, string phone, CurrencyType currency, decimal dailyLimit)
     {
-        var errors = ValidateFieldsRequired(name, lastName, documentType, documentNumber, email, phone);
+        var errors = ValidateFieldsRequired(name, lastName, documentType, documentNumber, email, phone, currency, dailyLimit);
 
         if (errors.Any())
-            throw new ValidationException(errors);
+            throw new DomainValidationException("wallet.invalid", "Validation failed", errors);
 
         var wallet = new Wallet();
+
         try
         {
-
             var walletId = WalletId.NewId();
 
-            var walletLimit = WalletLimit.Create(
-                walletId,
-                currency,
-                dailyLimit
-            );
+            var walletLimit = WalletLimit.Create(walletId, currency, dailyLimit);
 
             wallet = new Wallet
             {
-                Id = walletId
+                Id = walletId,
                 Name = name.Trim(),
                 LastName = lastName.Trim(),
                 Email = Email.Create(email),
                 Phone = PhoneNumber.Create(phone),
-                Limit = WalletLimit.Create(currency, dailyLimit, walletLimitId),
+                Limit = walletLimit,
                 Document = DocumentId.Create(documentType, documentNumber),
-                Status = WalletStatus.OPERATIVE,
+                WalletStatus = WalletStatus.OPERATIVE,
                 WalletLimit = walletLimit
             };
         }
@@ -60,16 +58,15 @@ public class Wallet : AggreateRoot<WalletId>
                 _ => ""
             };
 
-            var errorsVo = iv.Errors.ToDictionary(k => $"{prefix}", v => v.Value);
+            var errorsVo = iv.Errors.ToDictionary(k => prefix, v => v.Value);
 
-            //foreach (var kv in DomainErrors.Prefix($"{prefix}", iv.Errors))
             foreach (var kv in errorsVo)
                 errors[kv.Key] = kv.Value;
 
         }
 
         if (errors.Count > 0)
-                throw new DomainValidationException("wallet.invalid", "Domain validation failed", errors);
+            throw new DomainValidationException("wallet.invalid", "Domain validation failed", errors);
 
         return wallet;
     }
@@ -99,7 +96,14 @@ public class Wallet : AggreateRoot<WalletId>
         // Validación de phone
         if (string.IsNullOrWhiteSpace(phone))
             errors["phone"] = new[] { "El teléfono es requerido." };
-        
+
+        // Currency and dailyLimit validation
+        if (!Enum.IsDefined(typeof(CurrencyType), currency) || currency.Equals(default(CurrencyType)))
+            errors["currency"] = new[] { "El tipo de moneda es requerido y debe ser válido." };
+
+        if (dailyLimit <= 0m)
+            errors["dailyLimit"] = new[] { "El límite diario debe ser mayor a 0." };
+
         return errors;
     }
     
@@ -114,7 +118,7 @@ public class Wallet : AggreateRoot<WalletId>
     public void ChangeLastName(string lastName)
     {
         EnsureOperative();
-        if (string.IsNullOrWhiteSpace(lastName)) throw new BusinessRuleViolationException("wallet.lastName.required", "El nombre es obligatorio");
+        if (string.IsNullOrWhiteSpace(lastName)) throw new BusinessRuleViolationException("wallet.lastName.required", "El apellido es obligatorio");
         LastName = lastName.Trim();
         SetModified();
     }
@@ -138,28 +142,28 @@ public class Wallet : AggreateRoot<WalletId>
     public void ChangePhone(string phone)
     {
         EnsureOperative();
-        Phone = new PhoneNumber(phone);
+        Phone = PhoneNumber.Create(phone);
         SetModified();
     }
     
     private void EnsureOperative()
     {
-        if (Status != WalletStatus.OPERATIVE)
-            throw new InvalidDomainStateException("wallet.status.suspended", "La billetera no está activo para esta operación.");
+        if (WalletStatus != WalletStatus.OPERATIVE)
+            throw new InvalidDomainStateException("wallet.walletStatus.suspended", "La billetera no está activo para esta operación.");
     }
     
     public void Operative()
     {
-        if (Status == WalletStatus.OPERATIVE) return;
-        Status = WalletStatus.OPERATIVE;
+        if (WalletStatus == WalletStatus.OPERATIVE) return;
+        WalletStatus = WalletStatus.OPERATIVE;
         SetModified();
     }
 
-    public void Duspended()
+    public void Suspend()
     {
-        if (Status != WalletStatus.OPERATIVE)
-            throw new InvalidDomainStateException("wallet.status.suspended", "Solo un cliente activo puede desactivarse.");
-        Status = WalletStatus.SUSPENDED;
+        if (WalletStatus != WalletStatus.OPERATIVE)
+            throw new InvalidDomainStateException("wallet.walletStatus.suspended", "Solo un cliente activo puede desactivarse.");
+        WalletStatus = WalletStatus.SUSPENDED;
         SetModified();
     }
 }
