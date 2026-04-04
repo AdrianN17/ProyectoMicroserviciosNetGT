@@ -1,5 +1,5 @@
 ﻿
-namespace WalletService.Domain.Common
+namespace TransactionService.Domain.Common
 {
     public abstract class DomainEvent : IDomainEvent
     {

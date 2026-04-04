@@ -1,6 +1,6 @@
 ﻿using MediatR;
 
-namespace WalletService.Domain.Common
+namespace TransactionService.Domain.Common
 {
     public interface IDomainEvent : INotification
     {

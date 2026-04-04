@@ -1,4 +1,6 @@
-﻿namespace WalletService.Domain.Common
+﻿using TransactionService.Domain.Exceptions;
+
+namespace TransactionService.Domain.Common
 {
     public static class Guard
     {

@@ -1,4 +1,4 @@
-﻿namespace WalletService.Domain.Exceptions
+﻿namespace TransactionService.Domain.Exceptions
 {
     internal sealed class InvalidValueObjectException : DomainValidationException
     {

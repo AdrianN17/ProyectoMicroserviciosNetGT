@@ -1,4 +1,6 @@
-﻿namespace WalletService.Domain.Exceptions
+﻿using TransactionService.Domain.Common;
+
+namespace TransactionService.Domain.Exceptions
 {
     internal sealed class InvalidDomainStateException : DomainException
     {

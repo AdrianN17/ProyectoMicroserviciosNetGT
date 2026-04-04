@@ -1,7 +1,7 @@
 ﻿namespace TransactionService.Domain.Enums;
 
-public enum CurrencyType
+public enum SourceType
 {
-    PEN = 1,
-    USD = 2
+    WEB = 1,
+    APP = 2
 }

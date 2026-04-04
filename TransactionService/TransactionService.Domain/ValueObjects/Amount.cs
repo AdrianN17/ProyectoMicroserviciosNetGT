@@ -1,4 +1,4 @@
-﻿using WalletService.Domain.Enums;
+﻿using TransactionService.Domain.Enums;
 
 namespace TransactionService.Domain.ValueObjects;
 
