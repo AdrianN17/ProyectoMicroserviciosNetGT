@@ -1,4 +1,6 @@
-﻿namespace WalletService.Domain.Interfaces;
+﻿using WalletService.Domain.Interfaces.Projections;
+
+namespace WalletService.Domain.Interfaces;
 
 public interface IWalletRepository
 {
@@ -7,4 +9,5 @@ public interface IWalletRepository
     Task<Wallet?> GetByIdAsync(WalletId id, CancellationToken cancellationToken = default);
     Task<bool> ExistsByDocumentNumberAsync(string documentNumber, CancellationToken cancellationToken = default);
 
+    Task<WalletLimitProjection?> GetLimitByIdAsync(WalletId id, CancellationToken cancellationToken = default);
 }

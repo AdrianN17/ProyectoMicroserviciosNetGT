@@ -4,23 +4,18 @@ using WalletService.Application.Wallets.Commands.CreateWallet;
 using WalletService.Application.Wallets.Commands.DeleteWallet;
 using WalletService.Application.Wallets.Queries.GetByIdWallet;
 using WalletService.Application.Wallets.Commands.UpdateWallet;
+using WalletService.Application.Wallets.Queries.GetLimitByIdWalletLimit;
 
 namespace WalletService.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class WalletsController : ControllerBase
+    public class WalletsController(IMediator mediator) : ControllerBase
     {
-        private readonly IMediator _mediator;
-        public WalletsController(IMediator mediator)
-        {
-            _mediator = mediator;
-        }
-
         [HttpPost(Name = "Wallet_Create")]
         public async Task<IActionResult> Create(CreateWalletCommand command, CancellationToken cancellationToken)
         {
-            var result = await _mediator.Send(command, cancellationToken);
+            var result = await mediator.Send(command, cancellationToken);
 
             return result.Match(
                 walletId => CreatedAtAction(nameof(GetById), new { walletId }, new { walletId }),
@@ -31,12 +26,12 @@ namespace WalletService.Api.Controllers
         [HttpGet("{walletId:guid}", Name = "Wallet_GetById")]
         public async Task<IActionResult> GetById(Guid walletId)
         {
-            var result = await _mediator.Send(new GetByIdWalletQuery(walletId));
+            var result = await mediator.Send(new GetByIdWalletQuery(walletId));
 
             await Task.Delay(6);
 
             return result.Match(
-                wallet => Ok(wallet),
+                Ok,
                 errors => ErrorOrHttp.MapToProblem(this, errors)
             );
         }
@@ -45,7 +40,7 @@ namespace WalletService.Api.Controllers
         public async Task<IActionResult> Update(Guid walletId, UpdateWalletCommand command, CancellationToken cancellationToken)
         {
             var commandWithId = command with { WalletId = walletId };
-            var result = await _mediator.Send(commandWithId, cancellationToken);
+            var result = await mediator.Send(commandWithId, cancellationToken);
             
             return result.Match(
                 walletId => CreatedAtAction(nameof(GetById), new { walletId }, new { walletId }),
@@ -56,12 +51,25 @@ namespace WalletService.Api.Controllers
         [HttpDelete("{walletId:guid}", Name = "Wallet_Delete")]
         public async Task<IActionResult> DeleteById(Guid walletId)
         {
-            var result = await _mediator.Send(new DeleteWalletCommand(walletId));
+            var result = await mediator.Send(new DeleteWalletCommand(walletId));
 
             await Task.Delay(6);
 
             return result.Match(
-                walletId => NoContent(),
+                _ => NoContent(),
+                errors => ErrorOrHttp.MapToProblem(this, errors)
+            );
+        }
+        
+        [HttpGet("limit/{walletId:guid}", Name = "WalletLimit_GetById")]
+        public async Task<IActionResult> GetWalletLmitById(Guid walletId)
+        {
+            var result = await mediator.Send(new GetByIdWalletLimitQuery(walletId));
+
+            await Task.Delay(6);
+
+            return result.Match(
+                Ok,
                 errors => ErrorOrHttp.MapToProblem(this, errors)
             );
         }

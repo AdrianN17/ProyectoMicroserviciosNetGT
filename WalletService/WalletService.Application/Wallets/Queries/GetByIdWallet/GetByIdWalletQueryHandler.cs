@@ -1,7 +1,6 @@
-﻿﻿using WalletService.Application.Wallets.Dtos;
-using WalletService.Domain.Common;
-using ErrorOr;
+﻿using ErrorOr;
 using MediatR;
+using WalletService.Application.Wallets.Dtos;
 
 namespace WalletService.Application.Wallets.Queries.GetByIdWallet;
 

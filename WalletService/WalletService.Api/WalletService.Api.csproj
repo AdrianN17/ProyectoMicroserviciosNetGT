@@ -28,4 +28,9 @@
         <ProjectReference Include="..\WalletService.Infrastructure\WalletService.Infrastructure.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Mapper\" />
+      <Folder Include="Schema\" />
+    </ItemGroup>
+
 </Project>
