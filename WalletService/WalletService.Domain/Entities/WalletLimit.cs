@@ -95,4 +95,9 @@ public sealed class WalletLimit : AuditableEntity<WalletLimitId>
         Currency = currency;
         SetModified();
     }
+    
+    public void softDelete()
+    {
+        SetDeleted();
+    }
 }

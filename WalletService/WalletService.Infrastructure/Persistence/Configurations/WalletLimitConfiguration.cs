@@ -36,7 +36,7 @@ namespace WalletService.Infrastructure.Persistence.Configurations
 
             
             builder.HasOne(wl => wl.Wallet)
-                .WithOne(w => w.Limit)
+                .WithOne(w => w.WalletLimit)
                 .HasForeignKey<WalletLimit>(wl => wl.WalletId)
                 .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("FK_WalletLimit_Wallet");

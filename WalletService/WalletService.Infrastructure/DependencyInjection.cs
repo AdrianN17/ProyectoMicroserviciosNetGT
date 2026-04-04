@@ -18,13 +18,9 @@ namespace WalletService.Infrastructure
             var secretProviderType = configuration.GetValue<string>("SecretProviderType")?.ToLower();
             if (string.IsNullOrEmpty(secretProviderType)) throw new InvalidOperationException("SecretProviderType configuration is missing. Valid values are 'SecretsManager' or 'Vault'.");
 
-            if (secretProviderType.Equals("secretsmanager", StringComparison.CurrentCultureIgnoreCase))
+            if (secretProviderType.Equals("keyvault", StringComparison.CurrentCultureIgnoreCase))
             {
-               services.AddSecretsManagerConfiguration(configuration);
-            }
-            else if (secretProviderType.Equals("vault", StringComparison.CurrentCultureIgnoreCase))
-            {
-                services.AddVaultConfiguration(configuration);
+                services.AddKeyVaultConfiguration(configuration);
             }
             else
             {
@@ -41,7 +37,7 @@ namespace WalletService.Infrastructure
             services.AddDbContext<ApplicationDbContext>((sp, options) =>
             {
                 var secrets = sp.GetRequiredService<ISecretProvider>();
-                var connectionString = secrets.GetSecretAsync("CustomerSqlServerConnection").GetAwaiter().GetResult();
+                var connectionString = secrets.GetSecretAsync("WalletSqlServerConnection").GetAwaiter().GetResult();
 
                 if (connectionString is null) {
                     throw new InvalidOperationException("Connection string for CustomerSqlServerConnection is not configured in Vault");

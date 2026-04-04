@@ -8,13 +8,12 @@ public class Wallet : AggregateRoot<WalletId>
     public string LastName { get; private set; } = default!;  
     public Email Email { get; private set; } = default!;
     public PhoneNumber Phone { get; private set; } = default!;
-    public WalletLimit Limit { get; private set; } = default!;
+    public WalletLimit WalletLimit { get; private set; } = default!;
 
     public DocumentId Document { get; private set; } = default!;
 
     public WalletStatus WalletStatus  { get; private set; }
-
-    public WalletLimit WalletLimit { get; set; } = default!;
+    
 
     private Wallet()
     {
@@ -43,10 +42,9 @@ public class Wallet : AggregateRoot<WalletId>
                 LastName = lastName.Trim(),
                 Email = Email.Create(email),
                 Phone = PhoneNumber.Create(phone),
-                Limit = walletLimit,
+                WalletLimit = walletLimit,
                 Document = DocumentId.Create(documentType, documentNumber),
-                WalletStatus = WalletStatus.OPERATIVE,
-                WalletLimit = walletLimit
+                WalletStatus = WalletStatus.OPERATIVE
             };
         }
         catch (InvalidValueObjectException iv)
@@ -165,5 +163,10 @@ public class Wallet : AggregateRoot<WalletId>
             throw new InvalidDomainStateException("wallet.walletStatus.suspended", "Solo un cliente activo puede desactivarse.");
         WalletStatus = WalletStatus.SUSPENDED;
         SetModified();
+    }
+
+    public void SoftDelete()
+    {
+        SetDeleted();
     }
 }

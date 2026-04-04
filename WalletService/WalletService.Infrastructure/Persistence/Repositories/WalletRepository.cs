@@ -1,4 +1,4 @@
-﻿using WalletService.Domain.Interfaces;
+﻿﻿using WalletService.Domain.Interfaces;
 using WalletService.Infrastructure.Persistence.Contexts;
 using Microsoft.EntityFrameworkCore;
 
@@ -18,11 +18,6 @@ namespace WalletService.Infrastructure.Persistence.Repositories
             await _dbContext.Wallets.AddAsync(wallet);
         }
 
-        public Task DeleteAsync(WalletId id, CancellationToken cancellationToken = default)
-        {
-            throw new NotImplementedException();
-        }
-
         public async Task<bool> ExistsByDocumentNumberAsync(string documentNumber, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(documentNumber)) return false;
@@ -38,7 +33,7 @@ namespace WalletService.Infrastructure.Persistence.Repositories
         {
             return await _dbContext.Wallets
                 .Include(a => a.WalletLimit)
-                .FirstOrDefaultAsync(e => e.Id == id);
+                .FirstOrDefaultAsync(e => e.Id == id && !e.IsDeleted);
         }
 
         public async Task UpdateAsync(Wallet wallet, CancellationToken cancellationToken = default)

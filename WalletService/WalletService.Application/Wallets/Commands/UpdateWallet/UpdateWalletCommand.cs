@@ -12,6 +12,5 @@ public sealed record UpdateWalletCommand(
     string Email, 
     string Phone, 
     string Currency, 
-    decimal DailyLimit,
-    Guid WalletLimitId
+    decimal DailyLimit
 ) : IRequest<ErrorOr<Guid>>;

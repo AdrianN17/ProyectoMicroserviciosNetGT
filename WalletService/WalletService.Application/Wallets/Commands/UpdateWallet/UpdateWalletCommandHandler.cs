@@ -44,8 +44,8 @@ public sealed class UpdateWalletCommandHandler : IRequestHandler<UpdateWalletCom
         wallet.ChangeEmail(request.Email);
         wallet.ChangePhone(request.Phone);
         // Actualizar moneda y límite a través de WalletLimit
-        wallet.Limit.ChangeCurrency(currency);
-        wallet.Limit.ChangeLimit(request.DailyLimit);
+        wallet.WalletLimit.ChangeCurrency(currency);
+        wallet.WalletLimit.ChangeLimit(request.DailyLimit);
 
         await _walletRepository.UpdateAsync(wallet);
         await _unitOfWork.SaveChangesAsync(cancellationToken);

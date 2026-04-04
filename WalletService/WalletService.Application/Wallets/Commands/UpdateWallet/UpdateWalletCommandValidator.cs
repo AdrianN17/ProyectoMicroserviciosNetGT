@@ -48,9 +48,6 @@ public class UpdateWalletCommandValidator : AbstractValidator<UpdateWalletComman
         RuleFor(x => x.DailyLimit)
             .GreaterThan(0m).WithMessage("El límite diario debe ser mayor a 0.")
             .Must(d => (d % 500m) == 0m).WithMessage("El límite diario debe ser múltiplo de 500.");
-        
-        RuleFor(x => x.WalletLimitId)
-            .NotEmpty().WithMessage("El Identificador de daily limit es requerido.");
     }
     
     private async Task<bool> BeUniqueDocumentNumber(string documentNumber, CancellationToken cancellationToken)

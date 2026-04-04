@@ -25,16 +25,15 @@ public class CreateWalletCommandValidator : AbstractValidator<CreateWalletComman
         
         RuleFor(x => x.DocumentNumber)
             .NotEmpty().WithMessage("El número de documento es requerido.")
-            .MaximumLength(20).WithMessage("El número de documento no puede exceder los 50 caracteres.")
-            .MustAsync(async (docNumber, cancellationToken) => !await BeUniqueDocumentNumber(docNumber, cancellationToken)).WithMessage("El número de documento ya existe.");
+            .MaximumLength(20).WithMessage("El número de documento no puede exceder los 20 caracteres.")
+            .MustAsync(async (docNumber, cancellationToken) => await BeUniqueDocumentNumber(docNumber, cancellationToken))
+            .WithMessage("El número de documento ya existe.");
 
-        RuleFor(x => x.DocumentType)
-            .NotEmpty().WithMessage("El tipo de documento es requerido")
-            .MustAsync(IsNotValidDocumentType).WithMessage("El tipo de documento no es válido.");
-        
+        // Validación combinada: el formato del número depende del tipo de documento
         RuleFor(x => x)
-            .Must((x) => IsValidDocumentNumber(x.DocumentNumber, x.DocumentType)).WithMessage("El número de documento no es válido para el tipo de documento especificado.")
-            .OverridePropertyName($"documentNumber");
+            .Must((x) => IsValidDocumentNumber(x.DocumentNumber, x.DocumentType))
+            .WithMessage("El número de documento no es válido para el tipo de documento especificado.")
+            .OverridePropertyName("documentNumber");
 
         RuleFor(x => x.Email)
             .NotEmpty().WithMessage("El email es requerido.")
@@ -59,10 +58,6 @@ public class CreateWalletCommandValidator : AbstractValidator<CreateWalletComman
         return !await _walletRepository.ExistsByDocumentNumberAsync(documentNumber, cancellationToken);
     }
 
-    private async Task<bool> IsNotValidDocumentType(string documentType, CancellationToken cancellationToken)
-    {
-        return EnumParsing.TryParseEnum<DocumentType>(documentType, out _);
-    }
 
     private bool IsValidDocumentNumber(string documentNumber, string documentType)
     {

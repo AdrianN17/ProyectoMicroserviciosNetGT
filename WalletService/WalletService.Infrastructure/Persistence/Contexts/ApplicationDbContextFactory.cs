@@ -9,8 +9,14 @@ namespace WalletService.Infrastructure.Persistence.Contexts
         public ApplicationDbContext CreateDbContext(string[] args)
         {
             var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
+
+            var connectionString = Environment.GetEnvironmentVariable("DB_CONNECTION");
+
+            if (string.IsNullOrEmpty(connectionString))
+                throw new InvalidOperationException("DB_CONNECTION not configured");
+
             optionsBuilder
-                .UseSqlServer("Server=localhost,1434;Database=bd_customer;User Id=sa;Password=abc12345$;TrustServerCertificate=True;")
+                .UseSqlServer(connectionString)
                 .EnableSensitiveDataLogging();
 
             return new ApplicationDbContext(optionsBuilder.Options, new NoOpPublisher());

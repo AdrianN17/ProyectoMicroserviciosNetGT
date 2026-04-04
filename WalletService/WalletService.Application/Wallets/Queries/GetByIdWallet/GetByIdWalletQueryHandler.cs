@@ -30,9 +30,9 @@ public sealed class GetByIdWalletQueryHandler : IRequestHandler<GetByIdWalletQue
             wallet.Email.ToString(),
             wallet.Phone.ToString(),
             wallet.WalletStatus.ToString(),
-            wallet.Limit.Currency.ToString(),
-            wallet.Limit.DailyLimit,
-            wallet.Limit.Id.Value
+            wallet.WalletLimit.Currency.ToString(),
+            wallet.WalletLimit.DailyLimit,
+            wallet.WalletLimit.Id.Value
         );
     }
 }

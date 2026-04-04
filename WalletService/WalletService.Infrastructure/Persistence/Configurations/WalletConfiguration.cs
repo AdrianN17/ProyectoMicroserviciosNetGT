@@ -63,18 +63,8 @@ namespace WalletService.Infrastructure.Persistence.Configurations
                 .HasColumnType("int")
                 .HasColumnName("WalletStatus");
 
-            builder.Property(c => c.CreatedAt)
-                .IsRequired()
-                .HasColumnType("datetime")
-                .HasColumnName("CreatedAt");
-
-            builder.Property(c => c.LastModifiedAt)
-                .IsRequired()
-                .HasColumnType("datetime")
-                .HasColumnName("LastModifiedAt");
-
             // Relación con WalletLimit
-            builder.HasOne(w => w.Limit)
+            builder.HasOne(w => w.WalletLimit)
                 .WithOne(l => l.Wallet)
                 .HasForeignKey<WalletLimit>(l => l.WalletId)
                 .IsRequired()
