@@ -1,4 +1,4 @@
-﻿﻿using WalletService.Domain.Interfaces;
+﻿using WalletService.Domain.Interfaces;
 using WalletService.Infrastructure.Persistence.Contexts;
 using Microsoft.EntityFrameworkCore;
 using WalletService.Domain.Interfaces.Projections;
@@ -34,6 +34,7 @@ namespace WalletService.Infrastructure.Persistence.Repositories
         {
             return await _dbContext.Wallets
                 .Include(a => a.WalletLimit)
+                .Include(b => b.WalletBalance)
                 .FirstOrDefaultAsync(e => e.Id == id && !e.IsDeleted);
         }
 

@@ -36,7 +36,7 @@ namespace WalletService.Api.Controllers
             );
         }
         
-        [HttpPut("{walletId:guid}", Name = "Wallet_Update")]
+        [HttpPatch("{walletId:guid}", Name = "Wallet_Update")]
         public async Task<IActionResult> Update(Guid walletId, UpdateWalletCommand command, CancellationToken cancellationToken)
         {
             var commandWithId = command with { WalletId = walletId };

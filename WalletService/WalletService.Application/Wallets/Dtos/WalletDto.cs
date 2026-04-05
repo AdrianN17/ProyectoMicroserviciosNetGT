@@ -11,5 +11,6 @@ public record WalletDto(
     string Status,
     string Currency, 
     decimal DailyLimit,
+    decimal balanceAmount,
     Guid DailyLimitId
 );

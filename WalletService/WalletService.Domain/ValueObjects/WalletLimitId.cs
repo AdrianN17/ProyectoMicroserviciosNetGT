@@ -1,4 +1,4 @@
-﻿﻿namespace WalletService.Domain.ValueObjects;
+﻿namespace WalletService.Domain.ValueObjects;
 
 public readonly record struct WalletLimitId(Guid Value)
 {

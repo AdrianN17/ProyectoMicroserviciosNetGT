@@ -31,6 +31,7 @@ public sealed class GetByIdWalletQueryHandler : IRequestHandler<GetByIdWalletQue
             wallet.WalletStatus.ToString(),
             wallet.WalletLimit.Currency.ToString(),
             wallet.WalletLimit.DailyLimit,
+            wallet.WalletBalance.BalanceAmount,
             wallet.WalletLimit.Id.Value
         );
     }

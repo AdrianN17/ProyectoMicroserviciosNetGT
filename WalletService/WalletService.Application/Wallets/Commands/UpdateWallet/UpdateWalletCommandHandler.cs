@@ -22,30 +22,40 @@ public sealed class UpdateWalletCommandHandler : IRequestHandler<UpdateWalletCom
     
     public async Task<ErrorOr<Guid>> Handle(UpdateWalletCommand request, CancellationToken cancellationToken)
     {
+        Console.WriteLine("parte handler");
         _logger.LogInformation("Updating wallet with document number {DocumentNumber}", request.DocumentNumber);
-
-        if (!EnumParsing.TryParseEnum<DocumentType>(request.DocumentType, out var documentType))
-            return Error.Validation(code: "DocumentType.Invalid", description: $"DocumentType '{request.DocumentType}' no es válido.");
         
-        if (!EnumParsing.TryParseEnum<CurrencyType>(request.Currency, out var currency))
-            return Error.Validation(code: "CurrencyType.Invalid", description: $"CurrencyType '{request.Currency}' no es válido.");
-        
-        // Buscar la wallet existente y aplicar cambios usando las operaciones del dominio.
         var wallet = await _walletRepository.GetByIdAsync(new WalletId(request.WalletId));
         if (wallet == null)
         {
             return Error.NotFound("Wallet.NotFound", $"Wallet with id {request.WalletId} not found.");
         }
 
-        // Aplicar cambios (el dominio controla validaciones y reglas)
-        wallet.ChangeName(request.Name);
-        wallet.ChangeLastName(request.LastName);
-        wallet.ChangeDocument(documentType, request.DocumentNumber);
-        wallet.ChangeEmail(request.Email);
-        wallet.ChangePhone(request.Phone);
-        // Actualizar moneda y límite a través de WalletLimit
-        wallet.WalletLimit.ChangeCurrency(currency);
-        wallet.WalletLimit.ChangeLimit(request.DailyLimit);
+        if(request.Name != null)
+            wallet.ChangeName(request.Name);
+        if(request.LastName != null)
+            wallet.ChangeLastName(request.LastName);
+
+
+        if (request.DocumentType != null)
+        {
+            if (!EnumParsing.TryParseEnum<DocumentType>(request.DocumentType, out var documentType))
+                return Error.Validation(code: "DocumentType.Invalid", description: $"DocumentType '{request.DocumentType}' no es válido.");
+
+            wallet.ChangeDocument(documentType, request.DocumentNumber ?? wallet.Document.Number);
+        }
+        else
+            wallet.ChangeDocument(wallet.Document.Type, request.DocumentNumber ?? wallet.Document.Number);
+        
+        
+        if(request.Email != null)
+            wallet.ChangeEmail(request.Email);
+        
+        if(request.Phone != null)
+            wallet.ChangePhone(request.Phone);
+
+        if(request.DailyLimit != null)
+            wallet.WalletLimit.ChangeLimit((decimal)request.DailyLimit);
 
         await _walletRepository.UpdateAsync(wallet);
         await _unitOfWork.SaveChangesAsync(cancellationToken);

@@ -9,6 +9,8 @@ public class Wallet : AggregateRoot<WalletId>
     public Email Email { get; private set; } = default!;
     public PhoneNumber Phone { get; private set; } = default!;
     public WalletLimit WalletLimit { get; private set; } = default!;
+    
+    public WalletBalance WalletBalance { get; private set; } = default!;
 
     public DocumentId Document { get; private set; } = default!;
 
@@ -20,7 +22,7 @@ public class Wallet : AggregateRoot<WalletId>
     }
     
     public static Wallet Create(string name, string lastName, DocumentType documentType, string documentNumber, 
-        string email, string phone, CurrencyType currency, decimal dailyLimit)
+        string email, string phone, CurrencyType currency, decimal dailyLimit, decimal? balanceAmount=null)
     {
         var errors = ValidateFieldsRequired(name, lastName, documentType, documentNumber, email, phone, currency, dailyLimit);
 
@@ -44,7 +46,8 @@ public class Wallet : AggregateRoot<WalletId>
                 Phone = PhoneNumber.Create(phone),
                 WalletLimit = walletLimit,
                 Document = DocumentId.Create(documentType, documentNumber),
-                WalletStatus = WalletStatus.OPERATIVE
+                WalletStatus = WalletStatus.OPERATIVE,
+                WalletBalance = WalletBalance.Create(walletId, currency, balanceAmount ?? 0m)
             };
         }
         catch (InvalidValueObjectException iv)
@@ -75,32 +78,32 @@ public class Wallet : AggregateRoot<WalletId>
         var errors = new Dictionary<string, string[]>();
 
         if (string.IsNullOrWhiteSpace(name))
-            errors["name"] = new[] { "El nombre es requerido." };
+            errors["name"] = ["El nombre es requerido."];
 
         if (string.IsNullOrWhiteSpace(lastName))
-            errors["lastName"] = new[] { "El apellido es requerido." };
+            errors["lastName"] = ["El apellido es requerido."];
 
         // Validar documentType (enum) y documentNumber
         if (!Enum.IsDefined(typeof(DocumentType), documentType) || documentType.Equals(default(DocumentType)))
-            errors["documentType"] = new[] { "El tipo de documento es requerido y debe ser válido." };
+            errors["documentType"] = ["El tipo de documento es requerido y debe ser válido."];
 
         if (string.IsNullOrWhiteSpace(documentNumber))
-            errors["documentNumber"] = new[] { "El número de documento es requerido." };
+            errors["documentNumber"] = ["El número de documento es requerido."];
 
         // Validación de email
         if (string.IsNullOrWhiteSpace(email))
-            errors["email"] = new[] { "El email es requerido." };
+            errors["email"] = ["El email es requerido."];
 
         // Validación de phone
         if (string.IsNullOrWhiteSpace(phone))
-            errors["phone"] = new[] { "El teléfono es requerido." };
+            errors["phone"] = ["El teléfono es requerido."];
 
         // Currency and dailyLimit validation
         if (!Enum.IsDefined(typeof(CurrencyType), currency) || currency.Equals(default(CurrencyType)))
-            errors["currency"] = new[] { "El tipo de moneda es requerido y debe ser válido." };
+            errors["currency"] = ["El tipo de moneda es requerido y debe ser válido."];
 
         if (dailyLimit <= 0m)
-            errors["dailyLimit"] = new[] { "El límite diario debe ser mayor a 0." };
+            errors["dailyLimit"] = ["El límite diario debe ser mayor a 0."];
 
         return errors;
     }
@@ -148,13 +151,6 @@ public class Wallet : AggregateRoot<WalletId>
     {
         if (WalletStatus != WalletStatus.OPERATIVE)
             throw new InvalidDomainStateException("wallet.walletStatus.suspended", "La billetera no está activo para esta operación.");
-    }
-    
-    public void Operative()
-    {
-        if (WalletStatus == WalletStatus.OPERATIVE) return;
-        WalletStatus = WalletStatus.OPERATIVE;
-        SetModified();
     }
 
     public void Suspend()
