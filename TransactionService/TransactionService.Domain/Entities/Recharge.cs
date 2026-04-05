@@ -143,4 +143,33 @@ public class Recharge : AggregateRoot<RechargeId>
     {
         SetDeleted();
     }
+
+    /// <summary>
+    /// Reconstruye una Recharge desde persistencia (Cosmos DB) sin ejecutar validaciones de negocio.
+    /// Solo debe ser usado por la capa de infraestructura.
+    /// </summary>
+    public static Recharge Reconstitute(
+        RechargeId id,
+        WalletId walletId,
+        Amount amount,
+        MethodType methodType,
+        RechargeStatus rechargeStatus,
+        DateTime createdAt,
+        DateTime? lastModifiedAt,
+        bool isDeleted,
+        DateTime? deletedAt)
+    {
+        return new Recharge
+        {
+            Id             = id,
+            WalletId       = walletId,
+            Amount         = amount,
+            MethodType     = methodType,
+            RechargeStatus = rechargeStatus,
+            CreatedAt      = createdAt,
+            LastModifiedAt = lastModifiedAt,
+            IsDeleted      = isDeleted,
+            DeletedAt      = deletedAt
+        };
+    }
 }

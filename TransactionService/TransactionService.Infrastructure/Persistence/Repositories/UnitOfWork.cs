@@ -1,32 +1,21 @@
 ﻿using TransactionService.Application.Commmon.Interfaces;
-using TransactionService.Infrastructure.Persistence.Contexts;
 
 namespace TransactionService.Infrastructure.Persistence.Repositories
 {
+    /// <summary>
+    /// Cosmos DB no soporta transacciones distribuidas entre containers.
+    /// Las operaciones atómicas se manejan a nivel de un solo item (Transactional Batch dentro del mismo partition key).
+    /// Esta implementación mantiene la interfaz IUnitOfWork por compatibilidad con la capa Application.
+    /// </summary>
     public class UnitOfWork : IUnitOfWork
     {
-        private readonly ApplicationDbContext _dbContext;
+        // SaveChangesAsync es un no-op en Cosmos: cada repositorio persiste
+        // inmediatamente al llamar CreateAsync / UpdateAsync.
+        public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+            => Task.FromResult(0);
 
-        public UnitOfWork(ApplicationDbContext dbContext)
-        {
-            _dbContext = dbContext;
-        }
+        public void Dispose() { }
 
-        public void Dispose()
-        {
-            _dbContext.Dispose();
-            GC.SuppressFinalize(this);
-        }
-
-        public async ValueTask DisposeAsync()
-        {
-            await _dbContext.DisposeAsync();
-            GC.SuppressFinalize(this);
-        }
-
-        public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
-        {
-            return await _dbContext.SaveChangesAsync(cancellationToken);
-        }
+        public ValueTask DisposeAsync() => ValueTask.CompletedTask;
     }
 }
