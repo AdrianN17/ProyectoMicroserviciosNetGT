@@ -1,7 +1,4 @@
-﻿using TransactionService.Domain.Entities;
-using TransactionService.Domain.ValueObjects;
-
-namespace TransactionService.Domain.Interfaces;
+﻿namespace TransactionService.Domain.Interfaces;
 
 public interface ITransactionRepository
 {
