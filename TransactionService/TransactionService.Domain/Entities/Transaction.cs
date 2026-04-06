@@ -113,35 +113,4 @@ public class Transaction : AggregateRoot<TransactionId>
     {
         SetDeleted();
     }
-
-    /// <summary>
-    /// Reconstruye una Transaction desde persistencia (Cosmos DB) sin ejecutar validaciones de negocio.
-    /// Solo debe ser usado por la capa de infraestructura.
-    /// </summary>
-    public static Transaction Reconstitute(
-        TransactionId id,
-        WalletId fromWalletId,
-        WalletId toWalletId,
-        Amount amount,
-        TransactionStatus transactionStatus,
-        SourceType sourceType,
-        DateTime createdAt,
-        DateTime? lastModifiedAt,
-        bool isDeleted,
-        DateTime? deletedAt)
-    {
-        return new Transaction
-        {
-            Id                = id,
-            FromWalletId      = fromWalletId,
-            ToWalletId        = toWalletId,
-            Amount            = amount,
-            TransactionStatus = transactionStatus,
-            SourceType        = sourceType,
-            CreatedAt         = createdAt,
-            LastModifiedAt    = lastModifiedAt,
-            IsDeleted         = isDeleted,
-            DeletedAt         = deletedAt
-        };
-    }
 }

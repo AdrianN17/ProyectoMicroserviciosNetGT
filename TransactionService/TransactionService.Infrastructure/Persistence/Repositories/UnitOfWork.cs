@@ -1,4 +1,5 @@
 ﻿using TransactionService.Application.Commmon.Interfaces;
+using TransactionService.Infrastructure.Persistence.Contexts;
 
 namespace TransactionService.Infrastructure.Persistence.Repositories
 {
@@ -9,13 +10,18 @@ namespace TransactionService.Infrastructure.Persistence.Repositories
     /// </summary>
     public class UnitOfWork : IUnitOfWork
     {
-        // SaveChangesAsync es un no-op en Cosmos: cada repositorio persiste
-        // inmediatamente al llamar CreateAsync / UpdateAsync.
+        private readonly ApplicationDbContext _context;
+
+        public UnitOfWork(ApplicationDbContext context)
+        {
+            _context = context;
+        }
+
         public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
-            => Task.FromResult(0);
+            => _context.SaveChangesAsync(cancellationToken);
 
-        public void Dispose() { }
+        public void Dispose() => _context.Dispose();
 
-        public ValueTask DisposeAsync() => ValueTask.CompletedTask;
+        public ValueTask DisposeAsync() => _context.DisposeAsync();
     }
 }

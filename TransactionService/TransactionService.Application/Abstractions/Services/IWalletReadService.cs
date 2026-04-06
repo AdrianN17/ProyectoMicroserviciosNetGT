@@ -2,7 +2,7 @@
 
 namespace TransactionService.Application.Abstractions.Services;
 
-public interface IWalletService
+public interface IWalletReadService
 {
     Task<WalletDto?> GetByIdAsync(Guid walletId, CancellationToken cancellationToken);
 }

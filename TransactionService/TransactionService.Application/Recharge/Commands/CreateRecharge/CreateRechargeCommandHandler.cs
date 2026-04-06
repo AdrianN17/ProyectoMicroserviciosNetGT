@@ -1,6 +1,8 @@
-﻿using ErrorOr;
+﻿using System.Net;
+using ErrorOr;
 using MediatR;
 using Microsoft.Extensions.Logging;
+using TransactionService.Application.Abstractions.Services;
 using TransactionService.Application.Commmon.Interfaces;
 using TransactionService.Application.Transactions.Commands.CreateRecharge;
 using DomainRecharge = TransactionService.Domain.Entities.Recharge;
@@ -12,25 +14,50 @@ public sealed class CreateRechargeCommandHandler : IRequestHandler<CreateRecharg
     private readonly IRechargeRepository _rechargeRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<CreateRechargeCommandHandler> _logger;
+    private readonly IWalletReadService _walletReadService;
+    private readonly IExcnangeReadService _exchangeReadService;
 
-    public CreateRechargeCommandHandler(IRechargeRepository rechargeRepository, IUnitOfWork unitOfWork,
-        ILogger<CreateRechargeCommandHandler> logger)
+    public CreateRechargeCommandHandler(IRechargeRepository rechargeRepository, IWalletReadService walletReadService, IExcnangeReadService exchangeReadService,
+        IUnitOfWork unitOfWork, ILogger<CreateRechargeCommandHandler> logger)
     {
         _rechargeRepository = rechargeRepository ?? throw new ArgumentNullException(nameof(rechargeRepository));
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _walletReadService = walletReadService ?? throw new ArgumentNullException(nameof(walletReadService));
+        _exchangeReadService = exchangeReadService ?? throw new ArgumentNullException(nameof(exchangeReadService));
     }
 
     public async Task<ErrorOr<Guid>> Handle(CreateRechargeCommand request, CancellationToken cancellationToken)
     {
         _logger.LogInformation("Creating recharge for wallet {WalletId}", request.WalletId);
 
+        var wallet = await _walletReadService.GetByIdAsync(request.WalletId, cancellationToken);
+        
+        if(wallet is null) throw new InvalidOperationException("La Wallet no existo o esta inactivo");
+
         if (!EnumParsing.TryParseEnum<CurrencyType>(request.Currency, out var currency))
             return Error.Validation(code: "CurrencyType.Invalid", description: $"CurrencyType '{request.Currency}' no es válido.");
 
         if (!EnumParsing.TryParseEnum<MethodType>(request.MethodType, out var methodType))
             return Error.Validation(code: "MethodType.Invalid", description: $"MethodType '{request.MethodType}' no es válido.");
+        
+        if (!EnumParsing.TryParseEnum<CurrencyType>(wallet.Currency, out var walletCurrency))
+            return Error.Validation(code: "CurrencyType.Invalid", description: $"CurrencyType of Wallet '{wallet.Currency}' no es válido.");
 
+        var balance = wallet.balanceAmount;
+        var rechargeAmount = request.Amount;
+
+        if (walletCurrency != currency)
+        {
+            var exchange = await _exchangeReadService.GetByCurrencyTypeAsync(currency, cancellationToken);
+            if(exchange is null) throw new InvalidOperationException("El tipo de cambio no existo o esta inactivo");
+            
+            rechargeAmount *= exchange.value;
+        }
+            
+        /*if(balance < rechargeAmount)
+            return Error.Validation(code: "Amount.Invalid", description: $"El monto de recarga no puede ser mayor al balance actual de la wallet.");*/
+        
         var recharge = DomainRecharge.Create(
             walletId: request.WalletId,
             amount: request.Amount,

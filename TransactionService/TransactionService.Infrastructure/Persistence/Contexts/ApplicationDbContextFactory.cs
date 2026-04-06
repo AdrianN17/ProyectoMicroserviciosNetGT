@@ -1,32 +1,30 @@
 ﻿using MediatR;
-using Microsoft.Azure.Cosmos;
-using TransactionService.Infrastructure.Persistence.Contexts;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Design;
 
 namespace TransactionService.Infrastructure.Persistence.Contexts
 {
-    /// <summary>
-    /// Inicializa la base de datos y los containers de Cosmos DB si no existen.
-    /// Úsala al arrancar la aplicación (o en scripts de despliegue).
-    /// </summary>
-    public static class CosmosDbInitializer
+    public class ApplicationDbContextFactory : IDesignTimeDbContextFactory<ApplicationDbContext>
     {
-        public static async Task EnsureCreatedAsync(CosmosClient client, string databaseName)
+        public ApplicationDbContext CreateDbContext(string[] args)
         {
-            // Crear la base de datos si no existe
-            var dbResponse = await client.CreateDatabaseIfNotExistsAsync(databaseName);
-            var database   = dbResponse.Database;
+            var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
 
-            // Crear container de Transactions  (partition key = /fromWalletId)
-            await database.CreateContainerIfNotExistsAsync(
-                new ContainerProperties(CosmosDbContext.TransactionsContainer, "/fromWalletId"));
+            var endpoint     = Environment.GetEnvironmentVariable("COSMOS_ENDPOINT")
+                               ?? throw new InvalidOperationException("COSMOS_ENDPOINT not configured");
+            var accountKey   = Environment.GetEnvironmentVariable("COSMOS_KEY")
+                               ?? throw new InvalidOperationException("COSMOS_KEY not configured");
+            var databaseName = Environment.GetEnvironmentVariable("COSMOS_DATABASE")
+                               ?? "TransactionServiceCosmosDb";
 
-            // Crear container de Recharges (partition key = /walletId)
-            await database.CreateContainerIfNotExistsAsync(
-                new ContainerProperties(CosmosDbContext.RechargesContainer, "/walletId"));
+            optionsBuilder
+                .UseCosmos(endpoint, accountKey, databaseName)
+                .EnableSensitiveDataLogging();
+
+            return new ApplicationDbContext(optionsBuilder.Options, new NoOpPublisher());
         }
     }
 
-    // Mantener el NoOpPublisher por si se necesita en tests
     public sealed class NoOpPublisher : IPublisher
     {
         public Task Publish<TNotification>(TNotification notification, CancellationToken cancellationToken = default)

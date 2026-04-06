@@ -11,8 +11,7 @@ public sealed class Amount
     public static Amount Create(decimal value, CurrencyType currency)
     {
         if (value <= 0) throw new ArgumentException("El monto debe ser mayor a cero.", nameof(value));
-        if (value > 500) throw new ArgumentException("El monto debe ser menor o igual a 500.", nameof(value));
-        
+
         return new Amount() { Value = value, Currency = currency };
     }
 

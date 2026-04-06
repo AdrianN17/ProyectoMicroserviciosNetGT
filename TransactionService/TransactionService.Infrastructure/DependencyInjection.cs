@@ -1,14 +1,20 @@
-﻿using MediatR;
-using Microsoft.Azure.Cosmos;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Polly;
+using Polly.CircuitBreaker;
+using Polly.Extensions.Http;
+using Polly.Retry;
+using Polly.Timeout;
 using TransactionService.Application.Abstractions.Secrets;
+using TransactionService.Application.Abstractions.Services;
 using TransactionService.Application.Commmon.Interfaces;
 using TransactionService.Domain.Interfaces;
 using TransactionService.Infrastructure.Caching;
 using TransactionService.Infrastructure.Configuration;
 using TransactionService.Infrastructure.Persistence.Contexts;
 using TransactionService.Infrastructure.Persistence.Repositories;
+using TransactionService.Infrastructure.Services;
 
 namespace TransactionService.Infrastructure
 {
@@ -37,42 +43,99 @@ namespace TransactionService.Infrastructure
 
         private static IServiceCollection AddPersistence(this IServiceCollection services, IConfiguration configuration)
         {
-            // ── Cosmos DB ───────────────────────────────────────────────────────────
-            // Los valores se resuelven en tiempo de ejecución desde Key Vault / config.
-            // Se espera que el ISecretProvider esté registrado antes de llegar aquí.
-            services.AddSingleton<CosmosClient>(sp =>
+            services.AddDbContext<ApplicationDbContext>((sp, options) =>
             {
                 var secrets      = sp.GetRequiredService<ISecretProvider>();
                 var endpoint     = secrets.GetSecretAsync("CosmosEndpoint").GetAwaiter().GetResult()
                                    ?? throw new InvalidOperationException("Secret 'CosmosEndpoint' is not configured.");
                 var accountKey   = secrets.GetSecretAsync("CosmosAccountKey").GetAwaiter().GetResult()
                                    ?? throw new InvalidOperationException("Secret 'CosmosAccountKey' is not configured.");
+                var databaseName = configuration.GetValue<string>("CosmosDatabaseName")
+                                   ?? throw new InvalidOperationException("Secret 'CosmosDatabaseName' is not configured.");
 
-                return new CosmosClient(endpoint, accountKey, new CosmosClientOptions
-                {
-                    SerializerOptions = new CosmosSerializationOptions
-                    {
-                        PropertyNamingPolicy = CosmosPropertyNamingPolicy.CamelCase
-                    }
-                });
+                options.UseCosmos(endpoint, accountKey, databaseName);
             });
-
-            services.AddScoped<CosmosDbContext>(sp =>
-            {
-                var client        = sp.GetRequiredService<CosmosClient>();
-                var publisher     = sp.GetRequiredService<IPublisher>();
-                var databaseName  = configuration.GetValue<string>("CosmosDatabaseName")
-                                    ?? "TransactionServiceDb";
-
-                return new CosmosDbContext(client, databaseName, publisher);
-            });
-
-            // ── Repositorios ────────────────────────────────────────────────────────
+            
             services.AddScoped<ITransactionRepository, TransactionRepository>();
             services.AddScoped<IRechargeRepository,    RechargeRepository>();
             services.AddScoped<IUnitOfWork,            UnitOfWork>();
 
+            var timeoutPolicy = GetTimeoutPolicy();
+            var retryPolicy = GetRetryPolicy();
+            var circuitBreakerPolicy = GetCircuitBreakerPolicy();
+            services.AddHttpClient<IWalletReadService, WalletReadService>(client =>
+                {
+                    var url = configuration.GetSection("Services:WalletService").Value;
+                    if (string.IsNullOrWhiteSpace(url))
+                        throw new InvalidOperationException("Falta la configuración 'Services:WalletService'.");
+                    client.BaseAddress = new Uri(url);
+
+                })
+                .AddPolicyHandler(retryPolicy)
+                .AddPolicyHandler(circuitBreakerPolicy)
+                .AddPolicyHandler(timeoutPolicy);
+            
+            services.AddHttpClient<IWalletReadService, WalletReadService>(client =>
+                {
+                    var url = configuration.GetSection("Services:WalletService").Value;
+                    if (string.IsNullOrWhiteSpace(url))
+                        throw new InvalidOperationException("Falta la configuración 'Services:WalletService'.");
+                    client.BaseAddress = new Uri(url);
+
+                })
+                .AddPolicyHandler(retryPolicy)
+                .AddPolicyHandler(circuitBreakerPolicy)
+                .AddPolicyHandler(timeoutPolicy);
+            
             return services;
+        }
+        
+        private static AsyncTimeoutPolicy<HttpResponseMessage> GetTimeoutPolicy()
+        {
+            return Policy.TimeoutAsync<HttpResponseMessage>(
+                seconds: 5,
+                timeoutStrategy: TimeoutStrategy.Optimistic, 
+                (context, timespan, task) =>
+                {
+                    Console.WriteLine($"Timeout alcanzado despues de {timespan.TotalSeconds}");
+                    return Task.CompletedTask;
+                }
+            ); 
+        }
+
+        private static AsyncRetryPolicy<HttpResponseMessage> GetRetryPolicy()
+        {
+            return HttpPolicyExtensions
+                .HandleTransientHttpError()
+                .OrResult(msg => msg.StatusCode == System.Net.HttpStatusCode.NotFound)
+                .WaitAndRetryAsync(5, retryAttemp => TimeSpan.FromSeconds(Math.Pow(2, retryAttemp)),
+                    onRetry: (outcome, timespan, retryAttemp, context) =>
+                    {
+                        Console.WriteLine($"Reintento {retryAttemp} despues de {timespan.TotalSeconds} segundos {outcome.Exception?.Message}");
+                    }
+                );
+        }
+
+        private static AsyncCircuitBreakerPolicy<HttpResponseMessage> GetCircuitBreakerPolicy()
+        {
+            return HttpPolicyExtensions
+                .HandleTransientHttpError()
+                .CircuitBreakerAsync(
+                    handledEventsAllowedBeforeBreaking: 3, 
+                    durationOfBreak: TimeSpan.FromSeconds(30),
+                    onBreak: (outcome, timespan) =>
+                    {
+                        Console.WriteLine($"Circuito abierto por {timespan.TotalSeconds} debido a {outcome.Exception?.Message}");
+                    },
+                    onHalfOpen: () =>
+                    {
+                        Console.WriteLine($"Circuito semi abierto");
+                    },
+                    onReset: () =>
+                    {
+                        Console.WriteLine($"Circuito cerrado - Esta trabajando con normalidad");
+                    }
+                );
         }
     }
 }
