@@ -1,7 +1,8 @@
 ﻿namespace WalletService.Domain.Interfaces.Projections;
 
-public record WalletLimitProjection
+public record WalletLimitProjection(
+    string Currency,
+    decimal DailyLimit
+)
 {
-    public string Currency { get; init; }
-    public decimal DailyLimit { get; init; }
 }

@@ -1,10 +1,11 @@
-﻿using MediatR;
+﻿﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using WalletService.Application.Wallets.Commands.CreateWallet;
 using WalletService.Application.Wallets.Commands.DeleteWallet;
 using WalletService.Application.Wallets.Queries.GetByIdWallet;
 using WalletService.Application.Wallets.Commands.UpdateWallet;
 using WalletService.Application.Wallets.Queries.GetLimitByIdWalletLimit;
+using WalletService.Application.Wallets.Queries.GetInformationByWallet;
 
 namespace WalletService.Api.Controllers
 {
@@ -67,6 +68,17 @@ namespace WalletService.Api.Controllers
             var result = await mediator.Send(new GetByIdWalletLimitQuery(walletId));
 
             await Task.Delay(6);
+
+            return result.Match(
+                Ok,
+                errors => ErrorOrHttp.MapToProblem(this, errors)
+            );
+        }
+
+        [HttpGet("information/{walletId:guid}", Name = "WalletInformation_GetById")]
+        public async Task<IActionResult> GetWalletInformationById(Guid walletId, CancellationToken cancellationToken)
+        {
+            var result = await mediator.Send(new GetInformationByWalletQuery(walletId), cancellationToken);
 
             return result.Match(
                 Ok,

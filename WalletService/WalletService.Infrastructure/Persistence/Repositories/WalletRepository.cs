@@ -1,7 +1,7 @@
-﻿using WalletService.Domain.Interfaces;
-using WalletService.Infrastructure.Persistence.Contexts;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
+using WalletService.Domain.Interfaces;
 using WalletService.Domain.Interfaces.Projections;
+using WalletService.Infrastructure.Persistence.Contexts;
 
 namespace WalletService.Infrastructure.Persistence.Repositories
 {
@@ -50,11 +50,23 @@ namespace WalletService.Infrastructure.Persistence.Repositories
         {
             return await _dbContext.Wallets
                 .Where(w => w.Id == id && !w.IsDeleted)
-                .Select(w => new WalletLimitProjection
-                {
-                    DailyLimit = w.WalletLimit.DailyLimit,
-                    Currency = w.WalletLimit.Currency.ToString()
-                })
+                .Select(w => new WalletLimitProjection( 
+                    w.WalletLimit.Currency.ToString(), 
+                    w.WalletLimit.DailyLimit
+                ))
+                .FirstOrDefaultAsync(cancellationToken);
+        }
+
+        public async Task<WalletInformationProjection?> GetInformationByIdAsync(WalletId id, CancellationToken cancellationToken = default)
+        {
+            return await _dbContext.Wallets
+                .Where(w => w.Id == id && !w.IsDeleted)
+                .Select(w => new WalletInformationProjection( 
+                    w.Id.Value,
+                        w.WalletLimit.DailyLimit,
+                    w.WalletLimit.Currency.ToString(), 
+                    w.WalletBalance.BalanceAmount
+                ))
                 .FirstOrDefaultAsync(cancellationToken);
         }
     }

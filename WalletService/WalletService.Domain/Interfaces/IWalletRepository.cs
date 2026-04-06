@@ -10,4 +10,5 @@ public interface IWalletRepository
     Task<bool> ExistsByDocumentNumberAsync(string documentNumber, CancellationToken cancellationToken = default);
 
     Task<WalletLimitProjection?> GetLimitByIdAsync(WalletId id, CancellationToken cancellationToken = default);
+    Task<WalletInformationProjection?> GetInformationByIdAsync(WalletId id, CancellationToken cancellationToken = default);
 }
