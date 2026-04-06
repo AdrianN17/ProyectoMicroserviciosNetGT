@@ -3,6 +3,6 @@ using ErrorOr;
 
 namespace TransactionService.Application.Transactions.Commands.DeleteTransaction;
 
-public sealed record DeleteTransactionCommandd(
+public sealed record DeleteTransactionCommand(
     Guid TransactionId
 ) : IRequest<ErrorOr<Guid>>;

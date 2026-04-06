@@ -3,7 +3,7 @@ using TransactionService.Domain.Interfaces;
 
 namespace TransactionService.Application.Transactions.Commands.DeleteTransaction;
 
-public class DeleteTransactionCommandValidator : AbstractValidator<DeleteTransactionCommandd>
+public class DeleteTransactionCommandValidator : AbstractValidator<DeleteTransactionCommand>
 {
     private readonly ITransactionRepository _transactionRepository;
 

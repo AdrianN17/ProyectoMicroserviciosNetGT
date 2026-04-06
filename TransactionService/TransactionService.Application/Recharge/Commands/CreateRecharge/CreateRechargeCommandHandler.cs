@@ -2,12 +2,10 @@
 using MediatR;
 using Microsoft.Extensions.Logging;
 using TransactionService.Application.Commmon.Interfaces;
-using TransactionService.Application.Common.Helpers;
-using TransactionService.Domain.Entities;
-using TransactionService.Domain.Enums;
-using TransactionService.Domain.Interfaces;
+using TransactionService.Application.Transactions.Commands.CreateRecharge;
+using DomainRecharge = TransactionService.Domain.Entities.Recharge;
 
-namespace TransactionService.Application.Transactions.Commands.CreateRecharge;
+namespace TransactionService.Application.Recharge.Commands.CreateRecharge;
 
 public sealed class CreateRechargeCommandHandler : IRequestHandler<CreateRechargeCommand, ErrorOr<Guid>>
 {
@@ -33,7 +31,7 @@ public sealed class CreateRechargeCommandHandler : IRequestHandler<CreateRecharg
         if (!EnumParsing.TryParseEnum<MethodType>(request.MethodType, out var methodType))
             return Error.Validation(code: "MethodType.Invalid", description: $"MethodType '{request.MethodType}' no es válido.");
 
-        var recharge = Recharge.Create(
+        var recharge = DomainRecharge.Create(
             walletId: request.WalletId,
             amount: request.Amount,
             currency: currency,

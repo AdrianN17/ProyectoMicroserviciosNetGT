@@ -1,10 +1,36 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <TargetFramework>net10.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <UserSecretsId>cdc70125-b5b3-4ce7-ac8d-c50465944e7c</UserSecretsId>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Compile Remove="Middlewares\**" />
+        <Content Remove="Middlewares\**" />
+        <EmbeddedResource Remove="Middlewares\**" />
+        <None Remove="Middlewares\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="MediatR" Version="14.0.0" />
+        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.3" />
+        <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.23.0" />
+        <PackageReference Include="Scalar.AspNetCore" Version="2.12.48" />
+        <PackageReference Include="VaultSharp" Version="1.17.5.1" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\TransactionService.Application\TransactionService.Application.csproj" />
+        <ProjectReference Include="..\TransactionService.Domain\TransactionService.Domain.csproj" />
+        <ProjectReference Include="..\TransactionService.Infrastructure\TransactionService.Infrastructure.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Folder Include="Mapper\" />
+        <Folder Include="Schema\" />
+    </ItemGroup>
 
 </Project>
