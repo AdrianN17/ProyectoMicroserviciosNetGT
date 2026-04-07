@@ -12,9 +12,9 @@ public class Recharge : AggregateRoot<RechargeId>
     }
 
     public static Recharge Create(Guid walletId, decimal amount, CurrencyType currency,
-        MethodType methodType, RechargeStatus rechargeStatus)
+        MethodType methodType, RechargeStatus rechargeStatus, decimal exchangeRate)
     {
-        var errors = ValidateFieldsRequired(walletId, amount, currency, methodType, rechargeStatus);
+        var errors = ValidateFieldsRequired(walletId, amount, currency, methodType, rechargeStatus, exchangeRate);
 
         if (errors.Any())
             throw new DomainValidationException("recharge.invalid", "Validation failed", errors);
@@ -27,7 +27,7 @@ public class Recharge : AggregateRoot<RechargeId>
             {
                 Id = RechargeId.NewId(),
                 WalletId = new WalletId(walletId),
-                Amount = Amount.Create(amount, currency),
+                Amount = Amount.Create(amount, currency, exchangeRate),
                 MethodType = methodType,
                 RechargeStatus = rechargeStatus
             };
@@ -45,6 +45,7 @@ public class Recharge : AggregateRoot<RechargeId>
                     "walletId" => "walletId",
                     "amount" or "value" or "money" => "amount",
                     "currency" => "currency",
+                    "exchangeRate" => "exchangeRate",
                     _ => key
                 };
 
@@ -71,7 +72,7 @@ public class Recharge : AggregateRoot<RechargeId>
     }
 
     public static Dictionary<string, string[]> ValidateFieldsRequired(Guid walletId,
-        decimal amount, CurrencyType currency, MethodType methodType, RechargeStatus rechargeStatus)
+        decimal amount, CurrencyType currency, MethodType methodType, RechargeStatus rechargeStatus, decimal exchangeRate)
     {
         var errors = new Dictionary<string, string[]>();
 
@@ -82,6 +83,9 @@ public class Recharge : AggregateRoot<RechargeId>
         // amount requerido
         if (amount <= 0m)
             errors["amount"] = ["El monto debe ser mayor a cero."];
+        
+        if (exchangeRate <= 0m)
+            errors["exchangeRate"] = ["El ratio de cambio debe ser mayor a cero."];
 
         // currency requerido y válido
         if (!Enum.IsDefined(typeof(CurrencyType), currency) || currency.Equals(default(CurrencyType)))
@@ -137,6 +141,11 @@ public class Recharge : AggregateRoot<RechargeId>
         }
 
         return errors;
+    }
+
+    public decimal TotalCalculated(CurrencyType currency)
+    {
+        return Amount.Currency == currency ? Amount.Value : Amount.ApplyExchange();
     }
 
     public void SoftDelete()

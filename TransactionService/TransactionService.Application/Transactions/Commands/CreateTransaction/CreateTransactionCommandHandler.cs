@@ -45,51 +45,22 @@ public sealed class CreateTransactionCommandHandler : IRequestHandler<CreateTran
         if (!EnumParsing.TryParseEnum<CurrencyType>(walletTo.Currency, out var walletToCurrency))
             return Error.Validation(code: "CurrencyType.Invalid", description: $"CurrencyType of walletTo '{walletTo.Currency}' no es válido.");
         
-        
-        var balanceFrom = walletFrom.balanceAmount;
-        var rechargeAmountFrom = request.Amount;
-
-        if (walletFromCurrency != currency)
-        {
-            var exchange = await _exchangeReadService.GetByCurrencyTypeAsync(currency, cancellationToken);
-            if(exchange is null) throw new InvalidOperationException("El tipo de cambio no existo o esta inactivo");
-            
-            rechargeAmountFrom *= exchange.value;
-        }
-            
-        if(balanceFrom < rechargeAmountFrom)
-            return Error.Validation(code: "Amount.Invalid", description: $"El monto de transferencia no puede ser mayor al balance actual de la wallet.");
-        
-        
-
-        /*var amountExchangeFrom = request.Amount;
-        var amountExchangeTo = request.Amount;
-
-        if (walletFromCurrency != currency)
-        {
-            var exchangeFrom = await _exchangeReadService.GetByCurrencyTypeAsync(walletFromCurrency, cancellationToken);
-            if(exchangeFrom is null) throw new InvalidOperationException("El tipo de cambio de walletFrom no existo o esta inactivo");
-
-            amountExchangeFrom *= exchangeFrom.value;
-        }
-
-        if (walletToCurrency != currency)
-        {
-            var exchangeTo = await _exchangeReadService.GetByCurrencyTypeAsync(walletToCurrency, cancellationToken);
-            if(exchangeTo is null) throw new InvalidOperationException("El tipo de cambio de walletTo no existo o esta inactivo");
-
-            amountExchangeFrom *= exchangeTo.value;
-        }*/
-        
-        
+        var exchange = await _exchangeReadService.GetByCurrencyTypeAsync(currency, cancellationToken);
+        if(exchange is null) throw new InvalidOperationException("El tipo de cambio no existo o esta inactivo");
         
         var transaction = Transaction.Create(
             fromWalletId: request.FromWalletId,
             toWalletId: request.ToWalletId,
             amount: request.Amount,
             currency: currency,
-            sourceType: sourceType
+            sourceType: sourceType,
+            exchangeRate: exchange.value
         );
+        
+        transaction.TotalCalculatedToWalletFrom(walletFrom.balanceAmount, walletFromCurrency);
+        
+        Console.WriteLine("El monto a cambiar fue de : " + transaction.TotalCalculated(walletFromCurrency));
+
         
         await _transactionRepository.CreateAsync(transaction);
         await _unitOfWork.SaveChangesAsync(cancellationToken);

@@ -44,30 +44,23 @@ public sealed class CreateRechargeCommandHandler : IRequestHandler<CreateRecharg
         if (!EnumParsing.TryParseEnum<CurrencyType>(wallet.Currency, out var walletCurrency))
             return Error.Validation(code: "CurrencyType.Invalid", description: $"CurrencyType of Wallet '{wallet.Currency}' no es válido.");
 
-        var balance = wallet.balanceAmount;
-        var rechargeAmount = request.Amount;
-
-        if (walletCurrency != currency)
-        {
-            var exchange = await _exchangeReadService.GetByCurrencyTypeAsync(currency, cancellationToken);
-            if(exchange is null) throw new InvalidOperationException("El tipo de cambio no existo o esta inactivo");
-            
-            rechargeAmount *= exchange.value;
-        }
-            
-        /*if(balance < rechargeAmount)
-            return Error.Validation(code: "Amount.Invalid", description: $"El monto de recarga no puede ser mayor al balance actual de la wallet.");*/
+        
+        var exchange = await _exchangeReadService.GetByCurrencyTypeAsync(currency, cancellationToken);
+        if(exchange is null) throw new InvalidOperationException("El tipo de cambio no existo o esta inactivo");
         
         var recharge = DomainRecharge.Create(
             walletId: request.WalletId,
             amount: request.Amount,
             currency: currency,
             methodType: methodType,
-            rechargeStatus: RechargeStatus.PROCESANDO
+            rechargeStatus: RechargeStatus.PROCESANDO,
+            exchangeRate: exchange.value
         );
 
         await _rechargeRepository.CreateAsync(recharge);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+        
+        Console.WriteLine("El monto a cambiar fue de : " + recharge.TotalCalculated(walletCurrency));
 
         return recharge.Id.Value;
     }

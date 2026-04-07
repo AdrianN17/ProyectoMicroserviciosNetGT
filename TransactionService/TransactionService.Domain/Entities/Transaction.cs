@@ -1,4 +1,4 @@
-﻿﻿using TransactionService.Domain.Common;
+﻿using TransactionService.Domain.Common;
 using TransactionService.Domain.Enums;
 using TransactionService.Domain.Exceptions;
 using TransactionService.Domain.ValueObjects;
@@ -19,9 +19,9 @@ public class Transaction : AggregateRoot<TransactionId>
     {
     }
 
-    public static Transaction Create(Guid fromWalletId, Guid toWalletId, decimal amount, CurrencyType currency, SourceType sourceType)
+    public static Transaction Create(Guid fromWalletId, Guid toWalletId, decimal amount, CurrencyType currency, SourceType sourceType, decimal exchangeRate)
     {
-        var errors = ValidateFieldsRequired(fromWalletId, toWalletId, amount, currency, sourceType);
+        var errors = ValidateFieldsRequired(fromWalletId, toWalletId, amount, currency, sourceType, exchangeRate);
 
         if (errors.Any())
             throw new DomainValidationException("transaction.invalid", "Validation failed", errors);
@@ -35,7 +35,7 @@ public class Transaction : AggregateRoot<TransactionId>
                 Id = TransactionId.NewId(),
                 FromWalletId = new WalletId(fromWalletId),
                 ToWalletId = new WalletId(toWalletId),
-                Amount = Amount.Create(amount, currency),
+                Amount = Amount.Create(amount, currency, exchangeRate),
                 TransactionStatus = TransactionStatus.PROCESANDO,
                 SourceType = sourceType
             };
@@ -57,6 +57,7 @@ public class Transaction : AggregateRoot<TransactionId>
                     "amount" or "value" or "money" => "amount",
                     "currency" => "currency",
                     "sourceType" => "sourceType",
+                    "exchangeRate" => "exchangeRate",
                     _ => key
                 };
 
@@ -84,7 +85,7 @@ public class Transaction : AggregateRoot<TransactionId>
     }
 
     public static Dictionary<string, string[]> ValidateFieldsRequired(Guid fromWalletId, Guid toWalletId,
-        decimal amount, CurrencyType currency, SourceType sourceType)
+        decimal amount, CurrencyType currency, SourceType sourceType, decimal exchangeRate)
     {
         var errors = new Dictionary<string, string[]>();
 
@@ -100,13 +101,27 @@ public class Transaction : AggregateRoot<TransactionId>
         if (amount <= 0m)
             errors["amount"] = ["El monto debe ser mayor a cero."];
 
+        if (exchangeRate <= 0m)
+            errors["exchangeRate"] = ["El ratio de cambio debe ser mayor a cero."];
+
         if (!Enum.IsDefined(typeof(CurrencyType), currency) || currency.Equals(default(CurrencyType)))
             errors["currency"] = ["El tipo de moneda es requerido y debe ser válido."];
         
-        if (!Enum.IsDefined(typeof(SourceType), sourceType) || currency.Equals(default(SourceType)))
-            errors["currency"] = ["El origen es requerido y debe ser válido."];
+        if (!Enum.IsDefined(typeof(SourceType), sourceType) || sourceType.Equals(default(SourceType)))
+            errors["sourceType"] = ["El origen es requerido y debe ser válido."];
 
         return errors;
+    }
+    
+    public decimal TotalCalculated(CurrencyType currency)
+    {
+        return Amount.Currency == currency ? Amount.Value : Amount.ApplyExchange();
+    }
+    
+    public void TotalCalculatedToWalletFrom(decimal amount, CurrencyType currency)
+    {
+        if(TotalCalculated(Amount.Currency) < amount)
+            throw new InvalidOperationException("El monto de transferencia no puede ser mayor al balance actual de la wallet.");
     }
     
     public void SoftDelete()
