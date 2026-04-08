@@ -127,7 +127,7 @@ public class Transaction : AggregateRoot<TransactionId>
                 WalletId = FromWalletId,
                 Amount = TotalCalculated(currency),
                 Currency = currency,
-                Type = TypeOperation.Subtract
+                Type = (TransactionStatus == TransactionStatus.COMPLETED ? TypeOperation.Subtract : TypeOperation.Addition)
             },
 
             new Operation()
@@ -135,7 +135,7 @@ public class Transaction : AggregateRoot<TransactionId>
                 WalletId = ToWalletId,
                 Amount = TotalCalculated(currency),
                 Currency = currency,
-                Type = TypeOperation.Addition
+                Type = (TransactionStatus == TransactionStatus.COMPLETED ? TypeOperation.Addition : TypeOperation.Subtract)
             }
         ];
     }
@@ -156,5 +156,6 @@ public class Transaction : AggregateRoot<TransactionId>
     public void SoftDelete()
     {
         SetDeleted();
+        TransactionStatus = TransactionStatus.CANCELLED;
     }
 }

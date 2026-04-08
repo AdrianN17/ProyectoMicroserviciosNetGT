@@ -151,12 +151,13 @@ public class Recharge : AggregateRoot<RechargeId>
             WalletId = WalletId,
             Amount = TotalCalculated(currency),
             Currency = currency,
-            Type = TypeOperation.Subtract
+            Type = (RechargeStatus == RechargeStatus.COMPLETED ? TypeOperation.Addition : TypeOperation.Subtract)
         };
     }
 
     public void SoftDelete()
     {
         SetDeleted();
+        RechargeStatus = RechargeStatus.CANCELLED;
     }
 }

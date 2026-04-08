@@ -1,6 +1,7 @@
-﻿using ErrorOr;
+﻿﻿using ErrorOr;
 using MediatR;
 using Microsoft.Extensions.Logging;
+using TransactionService.Application.Abstractions.Messaging;
 using TransactionService.Application.Abstractions.Services;
 using TransactionService.Application.Commmon.Interfaces;
 
@@ -13,15 +14,17 @@ public sealed class CreateTransactionCommandHandler : IRequestHandler<CreateTran
     private readonly ILogger<CreateTransactionCommandHandler> _logger;
     private readonly IWalletReadService _walletReadService;
     private readonly IExcnangeReadService _exchangeReadService;
+    private readonly IProducer _producer;
     
     public CreateTransactionCommandHandler(ITransactionRepository transactionRepository, IWalletReadService walletReadService, IExcnangeReadService exchangeReadService,
-        IUnitOfWork unitOfWork, ILogger<CreateTransactionCommandHandler> logger)
+        IUnitOfWork unitOfWork, ILogger<CreateTransactionCommandHandler> logger, IProducer producer)
     {
         _transactionRepository = transactionRepository ?? throw new ArgumentNullException(nameof(transactionRepository));
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _walletReadService = walletReadService ?? throw new ArgumentNullException(nameof(walletReadService));
         _exchangeReadService = exchangeReadService ?? throw new ArgumentNullException(nameof(exchangeReadService));
+        _producer = producer ?? throw new ArgumentNullException(nameof(producer));
     }
     
     public async Task<ErrorOr<Guid>> Handle(CreateTransactionCommand request, CancellationToken cancellationToken)
@@ -65,12 +68,13 @@ public sealed class CreateTransactionCommandHandler : IRequestHandler<CreateTran
         
         transaction.ValidateIfTransactionHaveLimit(walletFrom.DailyLimit, amountTransactions, walletFromCurrency);
         transaction.TotalCalculatedToWalletFrom(walletFrom.balanceAmount, walletFromCurrency);
-
-        //Enviar a wallet
-        transaction.ToOperation(walletFromCurrency);
- 
+        
         await _transactionRepository.CreateAsync(transaction);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+        
+        var operations = transaction.ToOperation(walletFromCurrency);
+        foreach (var operation in operations)
+            await _producer.PublishAsync(operation, cancellationToken);
 
         return transaction.Id.Value;
     }

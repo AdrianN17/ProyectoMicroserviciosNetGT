@@ -1,7 +1,8 @@
-﻿using System.Net;
+﻿﻿using System.Net;
 using ErrorOr;
 using MediatR;
 using Microsoft.Extensions.Logging;
+using TransactionService.Application.Abstractions.Messaging;
 using TransactionService.Application.Abstractions.Services;
 using TransactionService.Application.Commmon.Interfaces;
 using TransactionService.Application.Transactions.Commands.CreateRecharge;
@@ -16,15 +17,17 @@ public sealed class CreateRechargeCommandHandler : IRequestHandler<CreateRecharg
     private readonly ILogger<CreateRechargeCommandHandler> _logger;
     private readonly IWalletReadService _walletReadService;
     private readonly IExcnangeReadService _exchangeReadService;
+    private readonly IProducer _producer;
 
     public CreateRechargeCommandHandler(IRechargeRepository rechargeRepository, IWalletReadService walletReadService, IExcnangeReadService exchangeReadService,
-        IUnitOfWork unitOfWork, ILogger<CreateRechargeCommandHandler> logger)
+        IUnitOfWork unitOfWork, ILogger<CreateRechargeCommandHandler> logger, IProducer producer)
     {
         _rechargeRepository = rechargeRepository ?? throw new ArgumentNullException(nameof(rechargeRepository));
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _walletReadService = walletReadService ?? throw new ArgumentNullException(nameof(walletReadService));
         _exchangeReadService = exchangeReadService ?? throw new ArgumentNullException(nameof(exchangeReadService));
+        _producer = producer ?? throw new ArgumentNullException(nameof(producer));
     }
 
     public async Task<ErrorOr<Guid>> Handle(CreateRechargeCommand request, CancellationToken cancellationToken)
@@ -32,7 +35,6 @@ public sealed class CreateRechargeCommandHandler : IRequestHandler<CreateRecharg
         _logger.LogInformation("Creating recharge for wallet {WalletId}", request.WalletId);
 
         var wallet = await _walletReadService.GetByIdAsync(request.WalletId, cancellationToken);
-        
         if(wallet is null) throw new InvalidOperationException("La Wallet no existo o esta inactivo");
 
         if (!EnumParsing.TryParseEnum<CurrencyType>(request.Currency, out var currency))
@@ -59,9 +61,8 @@ public sealed class CreateRechargeCommandHandler : IRequestHandler<CreateRecharg
         await _rechargeRepository.CreateAsync(recharge);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         
-        //Enviar a wallet
-        recharge.ToOperation(walletCurrency);
-        Console.WriteLine("El monto a cambiar fue de : " + recharge.TotalCalculated(walletCurrency));
+        var operation = recharge.ToOperation(walletCurrency);
+        await _producer.PublishAsync(operation, cancellationToken);
 
         return recharge.Id.Value;
     }
