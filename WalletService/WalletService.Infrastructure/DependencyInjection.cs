@@ -1,4 +1,5 @@
-﻿using WalletService.Application.Abstractions.Secrets;
+﻿using MassTransit;
+using WalletService.Application.Abstractions.Secrets;
 using WalletService.Application.Commmon.Interfaces;
 using WalletService.Domain.Interfaces;
 using WalletService.Infrastructure.Caching;
@@ -8,6 +9,8 @@ using WalletService.Infrastructure.Persistence.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using WalletService.Infrastructure.Messaging;
+using IConsumer = WalletService.Application.Commmon.Interfaces.IConsumer;
 
 namespace WalletService.Infrastructure
 {
@@ -28,6 +31,30 @@ namespace WalletService.Infrastructure
             }
             services.AddSingleton<InMemorySecretCache>();
             services.AddPersistence(configuration);
+            services.AddServiceBus(configuration);
+
+            return services;
+        }
+        
+        private static IServiceCollection AddServiceBus(this IServiceCollection services, IConfiguration configuration)
+        {
+            services.AddMassTransit(busConfig =>
+            {
+                busConfig.UsingAzureServiceBus((context, cfg) =>
+                {
+                    var secretProvider = context.GetRequiredService<ISecretProvider>();
+                    var secretName = configuration.GetValue<string>("ServiceBusConnectionString")
+                                     ?? throw new InvalidOperationException("Falta la configuración 'ServiceBusConnectionString'.");
+
+                    var connectionString = secretProvider.GetSecretAsync(secretName).GetAwaiter().GetResult()
+                                           ?? throw new InvalidOperationException($"El secreto '{secretName}' no fue encontrado en KeyVault.");
+
+                    cfg.Host(connectionString);
+                    cfg.ConfigureEndpoints(context);
+                });
+            });
+
+            services.AddScoped<IConsumer, Consumer>();
 
             return services;
         }

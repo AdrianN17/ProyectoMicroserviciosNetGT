@@ -1,9 +1,11 @@
-﻿using ErrorOr;
+﻿﻿using ErrorOr;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using TransactionService.Application.Abstractions.Messaging;
+using TransactionService.Application.Abstractions.Messaging.Sender;
 using TransactionService.Application.Abstractions.Services;
 using TransactionService.Application.Commmon.Interfaces;
+using TransactionService.Application.Mapper;
 
 namespace TransactionService.Application.Transactions.Commands.DeleteTransaction;
 
@@ -48,7 +50,7 @@ public sealed class DeleteTransactionCommandHandler : IRequestHandler<DeleteTran
 
         var operations = transaction.ToOperation(walletCurrency);
         foreach (var operation in operations)
-            await _producer.PublishAsync(operation, cancellationToken);
+            await _producer.PublishAsync(operation.ToSendOperation(), cancellationToken);
 
         return transactionId.Value;
     }

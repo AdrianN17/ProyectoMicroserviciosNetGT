@@ -1,10 +1,10 @@
-﻿﻿using System.Net;
-using ErrorOr;
+﻿using ErrorOr;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using TransactionService.Application.Abstractions.Messaging;
 using TransactionService.Application.Abstractions.Services;
 using TransactionService.Application.Commmon.Interfaces;
+using TransactionService.Application.Mapper;
 using TransactionService.Application.Transactions.Commands.CreateRecharge;
 using DomainRecharge = TransactionService.Domain.Entities.Recharge;
 
@@ -62,7 +62,7 @@ public sealed class CreateRechargeCommandHandler : IRequestHandler<CreateRecharg
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         
         var operation = recharge.ToOperation(walletCurrency);
-        await _producer.PublishAsync(operation, cancellationToken);
+        await _producer.PublishAsync(operation.ToSendOperation(), cancellationToken);
 
         return recharge.Id.Value;
     }

@@ -26,7 +26,7 @@ public sealed class GetInformationByWalletQueryHandler : IRequestHandler<GetInfo
             walletInformation.WalletId,
             walletInformation.DailyLimit,
             walletInformation.Currency,
-            walletInformation.balanceAmount
+            walletInformation.BalanceAmount
         );
     }
 }

@@ -1,9 +1,10 @@
-﻿﻿using ErrorOr;
+﻿﻿﻿using ErrorOr;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using TransactionService.Application.Abstractions.Messaging;
 using TransactionService.Application.Abstractions.Services;
 using TransactionService.Application.Commmon.Interfaces;
+using TransactionService.Application.Mapper;
 
 namespace TransactionService.Application.Transactions.Commands.CreateTransaction;
 
@@ -74,7 +75,7 @@ public sealed class CreateTransactionCommandHandler : IRequestHandler<CreateTran
         
         var operations = transaction.ToOperation(walletFromCurrency);
         foreach (var operation in operations)
-            await _producer.PublishAsync(operation, cancellationToken);
+            await _producer.PublishAsync(operation.ToSendOperation(), cancellationToken);
 
         return transaction.Id.Value;
     }

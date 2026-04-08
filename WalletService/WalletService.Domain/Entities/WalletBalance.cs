@@ -66,4 +66,26 @@ public sealed class WalletBalance : AuditableEntity<WalletBalanceId>
     
         return errors;
     }
+    
+    public void UpdateBalance(Operation operation)
+    {
+        if (operation == null) throw new ArgumentNullException(nameof(operation));
+
+        var operationCurrency = operation.Currency;
+
+        if (operationCurrency != this.Currency)
+            throw new InvalidOperationException($"La moneda de la operación '{operationCurrency}' no coincide con la moneda del balance '{this.Currency}'.");
+
+        decimal newBalance = operation.Type switch
+        {
+            TypeOperation.Addition => BalanceAmount + operation.Amount,
+            TypeOperation.Subtract => BalanceAmount - operation.Amount,
+            _ => throw new InvalidOperationException($"Tipo de operación '{operation.Type}' no es válido.")
+        };
+
+        if (newBalance < 0m)
+            throw new InvalidOperationException("El balance no puede ser negativo.");
+
+        BalanceAmount = newBalance;
+    }
 }
