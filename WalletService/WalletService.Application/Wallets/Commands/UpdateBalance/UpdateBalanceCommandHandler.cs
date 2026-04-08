@@ -1,8 +1,7 @@
-﻿using ErrorOr;
+﻿﻿using ErrorOr;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using WalletService.Application.Commmon.Interfaces;
-using WalletService.Application.Common.Helpers;
 
 namespace WalletService.Application.Wallets.Commands.UpdateBalance;
 

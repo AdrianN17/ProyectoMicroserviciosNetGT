@@ -1,5 +1,4 @@
-﻿﻿﻿using MassTransit;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Polly;
@@ -7,14 +6,12 @@ using Polly.CircuitBreaker;
 using Polly.Extensions.Http;
 using Polly.Retry;
 using Polly.Timeout;
-using TransactionService.Application.Abstractions.Messaging;
 using TransactionService.Application.Abstractions.Secrets;
 using TransactionService.Application.Abstractions.Services;
 using TransactionService.Application.Commmon.Interfaces;
 using TransactionService.Domain.Interfaces;
 using TransactionService.Infrastructure.Caching;
 using TransactionService.Infrastructure.Configuration;
-using TransactionService.Infrastructure.Messaging;
 using TransactionService.Infrastructure.Persistence.Contexts;
 using TransactionService.Infrastructure.Persistence.Repositories;
 using TransactionService.Infrastructure.Services;
@@ -40,30 +37,7 @@ namespace TransactionService.Infrastructure
 
             services.AddSingleton<InMemorySecretCache>();
             services.AddPersistence(configuration);
-            services.AddServiceBus(configuration);
-
-            return services;
-        }
-
-        private static IServiceCollection AddServiceBus(this IServiceCollection services, IConfiguration configuration)
-        {
-            services.AddMassTransit(busConfig =>
-            {
-                busConfig.UsingAzureServiceBus((context, cfg) =>
-                {
-                    var secretProvider = context.GetRequiredService<ISecretProvider>();
-                    var secretName = configuration.GetValue<string>("ServiceBusConnectionString")
-                                     ?? throw new InvalidOperationException("Falta la configuración 'ServiceBusConnectionString'.");
-
-                    var connectionString = secretProvider.GetSecretAsync(secretName).GetAwaiter().GetResult()
-                                           ?? throw new InvalidOperationException($"El secreto '{secretName}' no fue encontrado en KeyVault.");
-
-                    cfg.Host(connectionString);
-                    cfg.ConfigureEndpoints(context);
-                });
-            });
-
-            services.AddScoped<IProducer, Producer>();
+            services.AddServiceBusConfiguration(configuration);
 
             return services;
         }
