@@ -26,10 +26,19 @@ namespace TransactionService.Infrastructure.Persistence.Repositories
                 .FirstOrDefaultAsync(cancellationToken);
         }
 
+        public async Task<IReadOnlyList<Recharge>> GetAllByFromWalletId(WalletId walletId, CancellationToken cancellationToken = default)
+        {
+            return await _context.Recharges
+                .Where(r => r.WalletId == walletId && !r.IsDeleted)
+                .ToListAsync(cancellationToken);
+        }
+
         public async Task UpdateAsync(Recharge recharge, CancellationToken cancellationToken = default)
         {
             _context.Recharges.Update(recharge);
             await _context.SaveChangesAsync(cancellationToken);
         }
+        
+        
     }
 }

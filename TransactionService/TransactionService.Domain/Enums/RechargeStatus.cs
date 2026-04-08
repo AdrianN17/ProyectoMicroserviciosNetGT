@@ -2,6 +2,6 @@
 
 public enum RechargeStatus
 {
-    PROCESANDO = 1,
-    COMPLETADO = 2,
+    COMPLETED = 1,
+    CANCELLED = 2,
 }

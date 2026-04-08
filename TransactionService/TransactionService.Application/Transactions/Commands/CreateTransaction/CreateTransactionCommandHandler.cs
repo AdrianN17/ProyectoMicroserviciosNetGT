@@ -26,7 +26,7 @@ public sealed class CreateTransactionCommandHandler : IRequestHandler<CreateTran
     
     public async Task<ErrorOr<Guid>> Handle(CreateTransactionCommand request, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Creating transaction from {FromWalletId} to {ToWalletId}", request.FromWalletId, request.ToWalletId);
+        _logger.LogInformation("Creating transaction from {FromWalletId} to {ToWalletId}", request.ToWalletId, request.ToWalletId);
         
         var walletFrom = await _walletReadService.GetByIdAsync(request.FromWalletId, cancellationToken);
         if(walletFrom is null) throw new InvalidOperationException("La Wallet origen no existo o esta inactivo");
@@ -47,6 +47,10 @@ public sealed class CreateTransactionCommandHandler : IRequestHandler<CreateTran
         
         var exchange = await _exchangeReadService.GetByCurrencyTypeAsync(currency, cancellationToken);
         if(exchange is null) throw new InvalidOperationException("El tipo de cambio no existo o esta inactivo");
+
+        var transactions =
+            await _transactionRepository.GetAllByFromWalletIdPeerDayAsync(new WalletId(request.FromWalletId));
+        
         
         var transaction = Transaction.Create(
             fromWalletId: request.FromWalletId,
@@ -57,11 +61,14 @@ public sealed class CreateTransactionCommandHandler : IRequestHandler<CreateTran
             exchangeRate: exchange.value
         );
         
+        var amountTransactions = transactions?.Sum(t => t.TotalCalculated(currency)) ?? 0m;
+        
+        transaction.ValidateIfTransactionHaveLimit(walletFrom.DailyLimit, amountTransactions, walletFromCurrency);
         transaction.TotalCalculatedToWalletFrom(walletFrom.balanceAmount, walletFromCurrency);
-        
-        Console.WriteLine("El monto a cambiar fue de : " + transaction.TotalCalculated(walletFromCurrency));
 
-        
+        //Enviar a wallet
+        transaction.ToOperation(walletFromCurrency);
+ 
         await _transactionRepository.CreateAsync(transaction);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 

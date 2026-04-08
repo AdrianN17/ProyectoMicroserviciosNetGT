@@ -12,9 +12,9 @@ public class Recharge : AggregateRoot<RechargeId>
     }
 
     public static Recharge Create(Guid walletId, decimal amount, CurrencyType currency,
-        MethodType methodType, RechargeStatus rechargeStatus, decimal exchangeRate)
+        MethodType methodType, decimal exchangeRate)
     {
-        var errors = ValidateFieldsRequired(walletId, amount, currency, methodType, rechargeStatus, exchangeRate);
+        var errors = ValidateFieldsRequired(walletId, amount, currency, methodType, exchangeRate);
 
         if (errors.Any())
             throw new DomainValidationException("recharge.invalid", "Validation failed", errors);
@@ -29,7 +29,7 @@ public class Recharge : AggregateRoot<RechargeId>
                 WalletId = new WalletId(walletId),
                 Amount = Amount.Create(amount, currency, exchangeRate),
                 MethodType = methodType,
-                RechargeStatus = rechargeStatus
+                RechargeStatus = RechargeStatus.COMPLETED
             };
         }
         catch (InvalidValueObjectException iv)
@@ -72,7 +72,7 @@ public class Recharge : AggregateRoot<RechargeId>
     }
 
     public static Dictionary<string, string[]> ValidateFieldsRequired(Guid walletId,
-        decimal amount, CurrencyType currency, MethodType methodType, RechargeStatus rechargeStatus, decimal exchangeRate)
+        decimal amount, CurrencyType currency, MethodType methodType, decimal exchangeRate)
     {
         var errors = new Dictionary<string, string[]>();
 
@@ -94,10 +94,6 @@ public class Recharge : AggregateRoot<RechargeId>
         // methodType requerido y válido
         if (!Enum.IsDefined(typeof(MethodType), methodType) || methodType.Equals(default(MethodType)))
             errors["methodType"] = ["El método de recarga es requerido y debe ser válido."];
-
-        // rechargeStatus requerido y válido
-        if (!Enum.IsDefined(typeof(RechargeStatus), rechargeStatus) || rechargeStatus.Equals(default(RechargeStatus)))
-            errors["rechargeStatus"] = ["El estado de la recarga es requerido y debe ser válido."];
 
         // Si ya hay errores base, no continuar con reglas de negocio
         if (errors.Count > 0)
@@ -146,6 +142,17 @@ public class Recharge : AggregateRoot<RechargeId>
     public decimal TotalCalculated(CurrencyType currency)
     {
         return Amount.Currency == currency ? Amount.Value : Amount.ApplyExchange();
+    }
+    
+    public Operation ToOperation(CurrencyType currency)
+    {
+        return new Operation()
+        {
+            WalletId = WalletId,
+            Amount = TotalCalculated(currency),
+            Currency = currency,
+            Type = TypeOperation.Subtract
+        };
     }
 
     public void SoftDelete()

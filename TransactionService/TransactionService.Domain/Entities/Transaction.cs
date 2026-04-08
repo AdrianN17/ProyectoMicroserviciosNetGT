@@ -36,7 +36,7 @@ public class Transaction : AggregateRoot<TransactionId>
                 FromWalletId = new WalletId(fromWalletId),
                 ToWalletId = new WalletId(toWalletId),
                 Amount = Amount.Create(amount, currency, exchangeRate),
-                TransactionStatus = TransactionStatus.PROCESANDO,
+                TransactionStatus = TransactionStatus.COMPLETED,
                 SourceType = sourceType
             };
         }
@@ -116,6 +116,35 @@ public class Transaction : AggregateRoot<TransactionId>
     public decimal TotalCalculated(CurrencyType currency)
     {
         return Amount.Currency == currency ? Amount.Value : Amount.ApplyExchange();
+    }
+
+    public List<Operation> ToOperation(CurrencyType currency)
+    {
+        return
+        [
+            new Operation()
+            {
+                WalletId = FromWalletId,
+                Amount = TotalCalculated(currency),
+                Currency = currency,
+                Type = TypeOperation.Subtract
+            },
+
+            new Operation()
+            {
+                WalletId = ToWalletId,
+                Amount = TotalCalculated(currency),
+                Currency = currency,
+                Type = TypeOperation.Addition
+            }
+        ];
+    }
+
+    public void ValidateIfTransactionHaveLimit(decimal limit, decimal amountTransactions, CurrencyType currency)
+    {
+        if (amountTransactions + TotalCalculated(currency) > limit)
+            throw new InvalidOperationException("El monto de transferencia excede el límite diario permitido para la wallet.");
+        
     }
     
     public void TotalCalculatedToWalletFrom(decimal amount, CurrencyType currency)

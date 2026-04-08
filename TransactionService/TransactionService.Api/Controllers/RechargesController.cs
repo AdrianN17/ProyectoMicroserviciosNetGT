@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using TransactionService.Application.Recharge.Queries;
+using TransactionService.Application.Recharge.Queries.GetAllByWalletId;
+using TransactionService.Application.Recharge.Queries.GetById;
 using TransactionService.Application.Transactions.Commands.CreateRecharge;
 using TransactionService.Application.Transactions.Commands.DeleteRecharge;
 
@@ -39,6 +40,17 @@ namespace TransactionService.Api.Controllers
 
             return result.Match(
                 _ => NoContent(),
+                errors => ErrorOrHttp.MapToProblem(this, errors)
+            );
+        }
+
+        [HttpGet("wallet/{walletId:guid}", Name = "Recharge_GetAllByWalletId")]
+        public async Task<IActionResult> GetAllByWalletId(Guid walletId, CancellationToken cancellationToken)
+        {
+            var result = await mediator.Send(new GetAllByWalletIdRechargeQuery(walletId), cancellationToken);
+
+            return result.Match(
+                Ok,
                 errors => ErrorOrHttp.MapToProblem(this, errors)
             );
         }

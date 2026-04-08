@@ -2,7 +2,8 @@
 using Microsoft.AspNetCore.Mvc;
 using TransactionService.Application.Transactions.Commands.CreateTransaction;
 using TransactionService.Application.Transactions.Commands.DeleteTransaction;
-using TransactionService.Application.Transactions.Queries;
+using TransactionService.Application.Transactions.Queries.GetAllByFromWalletId;
+using TransactionService.Application.Transactions.Queries.GetAllById;
 
 namespace TransactionService.Api.Controllers
 {
@@ -39,6 +40,17 @@ namespace TransactionService.Api.Controllers
 
             return result.Match(
                 _ => NoContent(),
+                errors => ErrorOrHttp.MapToProblem(this, errors)
+            );
+        }
+
+        [HttpGet("wallet/{fromWalletId:guid}", Name = "Transaction_GetAllByFromWalletId")]
+        public async Task<IActionResult> GetAllByFromWalletId(Guid fromWalletId, CancellationToken cancellationToken)
+        {
+            var result = await mediator.Send(new GetAllByFromWalletIdTransactionQuery(fromWalletId), cancellationToken);
+
+            return result.Match(
+                Ok,
                 errors => ErrorOrHttp.MapToProblem(this, errors)
             );
         }

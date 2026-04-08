@@ -18,6 +18,23 @@ namespace TransactionService.Infrastructure.Persistence.Repositories
                 .Where(t => t.Id == id && !t.IsDeleted)
                 .FirstOrDefaultAsync(cancellationToken);
         }
+        
+
+        public async Task<IReadOnlyList<Transaction>> GetAllByFromWalletIdPeerDayAsync(WalletId fromWalletId, CancellationToken cancellationToken = default)
+        {
+            var today = DateTime.Today;
+            return await context.Transactions
+                .Where(t => t.FromWalletId == fromWalletId && !t.IsDeleted
+                    && t.CreatedAt >= today && t.CreatedAt < today.AddDays(1))
+                .ToListAsync(cancellationToken);
+        }
+
+        public async Task<IReadOnlyList<Transaction>> GetAllByFromWalletId(WalletId fromWalletId, CancellationToken cancellationToken = default)
+        {
+            return await context.Transactions
+                .Where(t => t.FromWalletId == fromWalletId && !t.IsDeleted)
+                .ToListAsync(cancellationToken);
+        }
 
         public async Task UpdateAsync(Transaction transaction, CancellationToken cancellationToken = default)
         {

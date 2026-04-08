@@ -53,13 +53,14 @@ public sealed class CreateRechargeCommandHandler : IRequestHandler<CreateRecharg
             amount: request.Amount,
             currency: currency,
             methodType: methodType,
-            rechargeStatus: RechargeStatus.PROCESANDO,
             exchangeRate: exchange.value
         );
 
         await _rechargeRepository.CreateAsync(recharge);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         
+        //Enviar a wallet
+        recharge.ToOperation(walletCurrency);
         Console.WriteLine("El monto a cambiar fue de : " + recharge.TotalCalculated(walletCurrency));
 
         return recharge.Id.Value;
