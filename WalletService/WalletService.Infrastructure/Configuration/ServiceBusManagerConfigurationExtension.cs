@@ -30,8 +30,21 @@ public static class ServiceBusManagerConfigurationExtension
 
                 cfg.Host(connectionString);
 
-                cfg.ReceiveEndpoint(serviceBusOptions.QueueName, e =>
+                cfg.ReceiveEndpoint(serviceBusOptions.QueueName, (IServiceBusReceiveEndpointConfigurator e) =>
                 {
+                    // Azure Service Bus Basic tier only supports Queues, not Topics/Subscriptions.
+                    // Disable topology configuration to prevent MassTransit from trying to create Topics.
+                    e.ConfigureConsumeTopology = false;
+
+                    // Basic tier does not support AutoDeleteOnIdle on queues (including dead-letter queues).
+                    // Set to TimeSpan.MaxValue to effectively disable auto-delete.
+                    e.AutoDeleteOnIdle = TimeSpan.MaxValue;
+
+                    // Basic tier does not support creating '_skipped' or '_error' queues with AutoDeleteOnIdle.
+                    // Discard skipped/faulted messages instead of forwarding them to auxiliary queues.
+                    e.DiscardSkippedMessages();
+                    e.DiscardFaultedMessages();
+
                     e.ConfigureConsumer<UpdateBalanceConsumer>(context);
                 });
             });
