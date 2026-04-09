@@ -1,8 +1,7 @@
-﻿using MassTransit;
+﻿﻿using MassTransit;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using TransactionService.Application.Abstractions.Messaging;
-using TransactionService.Application.Abstractions.Messaging.Sender;
 using TransactionService.Application.Abstractions.Secrets;
 using TransactionService.Infrastructure.Messaging;
 
@@ -29,10 +28,6 @@ public static class ServiceBusManagerConfigurationExtension
                                        ?? throw new InvalidOperationException($"El secreto '{secretName}' no fue encontrado en KeyVault.");
 
                 cfg.Host(connectionString);
-
-                cfg.Message<SendOperation>(x => x.SetEntityName(serviceBusOptions.QueueName));
-
-                cfg.ConfigureEndpoints(context);
             });
         });
 
