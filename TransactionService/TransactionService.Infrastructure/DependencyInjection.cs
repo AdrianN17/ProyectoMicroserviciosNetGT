@@ -70,17 +70,16 @@ namespace TransactionService.Infrastructure
                     if (string.IsNullOrWhiteSpace(url))
                         throw new InvalidOperationException("Falta la configuración 'Services:WalletService'.");
                     client.BaseAddress = new Uri(url);
-
                 })
                 .AddPolicyHandler(retryPolicy)
                 .AddPolicyHandler(circuitBreakerPolicy)
                 .AddPolicyHandler(timeoutPolicy);
-            
-            services.AddHttpClient<IWalletReadService, WalletReadService>(client =>
+
+            services.AddHttpClient<IExcnangeReadService, ExchangeReadService>(client =>
                 {
-                    var url = configuration.GetSection("Services:WalletService").Value;
+                    var url = configuration.GetSection("Services:ExchangeService").Value;
                     if (string.IsNullOrWhiteSpace(url))
-                        throw new InvalidOperationException("Falta la configuración 'Services:WalletService'.");
+                        throw new InvalidOperationException("Falta la configuración 'Services:ExchangeService'.");
                     client.BaseAddress = new Uri(url);
 
                 })

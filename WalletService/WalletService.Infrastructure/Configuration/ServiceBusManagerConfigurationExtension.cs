@@ -2,7 +2,6 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using WalletService.Application.Abstractions.Secrets;
-using WalletService.Application.Wallets.Commands.UpdateBalance;
 using WalletService.Infrastructure.Messaging;
 
 namespace WalletService.Infrastructure.Configuration;
@@ -31,9 +30,10 @@ public static class ServiceBusManagerConfigurationExtension
 
                 cfg.Host(connectionString);
 
-                cfg.Message<UpdateBalanceCommand>(x => x.SetEntityName(serviceBusOptions.QueueName));
-
-                cfg.ConfigureEndpoints(context);
+                cfg.ReceiveEndpoint(serviceBusOptions.QueueName, e =>
+                {
+                    e.ConfigureConsumer<UpdateBalanceConsumer>(context);
+                });
             });
         });
 
