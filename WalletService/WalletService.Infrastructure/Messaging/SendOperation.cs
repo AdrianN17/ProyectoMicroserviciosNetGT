@@ -1,4 +1,4 @@
-﻿namespace TransactionService.Application.Abstractions.Messaging.Sender;
+﻿namespace WalletService.Infrastructure.Messaging;
 
 public sealed record SendOperation(
     string Type,
