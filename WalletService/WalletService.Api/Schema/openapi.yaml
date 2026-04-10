@@ -1,0 +1,206 @@
+openapi: 3.0.1
+info:
+  title: proyecto_billetera
+  description: ''
+  version: 1.0.0
+tags: []
+paths:
+  /wallets:
+    post:
+      summary: Create Wallet
+      deprecated: false
+      description: ''
+      operationId: createWallet
+      tags: []
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WalletSchemaRequest'
+            examples: {}
+        required: true
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WalletSchemaIdResponse'
+          headers: {}
+      security: []
+  /wallets/{walletId}:
+    delete:
+      summary: Delete Wallet
+      deprecated: false
+      description: ''
+      operationId: deleteWallet
+      tags: []
+      parameters:
+        - name: walletId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: ''
+          headers: {}
+      security: []
+    get:
+      summary: Find Wallet
+      deprecated: false
+      description: ''
+      operationId: findWallet
+      tags: []
+      parameters:
+        - name: walletId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WalletSchemaResponse'
+          headers: {}
+      security: []
+    patch:
+      summary: Update Wallet
+      deprecated: false
+      description: ''
+      operationId: updateWallet
+      tags: []
+      parameters:
+        - name: walletId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WalletPatchSchemaRequest'
+            examples: {}
+        required: true
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WalletSchemaIdResponse'
+          headers: {}
+      security: []
+components:
+  schemas:
+    WalletSchemaResponse:
+      type: object
+      properties:
+        WalletId:
+          type: string
+          format: uui
+        Name:
+          type: string
+        LastName:
+          type: string
+        DocumentNumber:
+          type: string
+        DocumentType:
+          type: string
+        Currency:
+          type: string
+        Email:
+          type: string
+        Phone:
+          type: string
+        DailyLimit:
+          type: number
+        balanceAmount:
+          type: number
+      required:
+        - WalletId
+        - DocumentNumber
+        - DocumentType
+        - Currency
+        - DailyLimit
+        - Name
+        - LastName
+        - Email
+        - Phone
+        - balanceAmount
+    WalletSchemaRequest:
+      type: object
+      properties:
+        Name:
+          type: string
+        LastName:
+          type: string
+        DocumentNumber:
+          type: string
+        DocumentType:
+          type: string
+        Email:
+          type: string
+        Phone:
+          type: string
+        Currency:
+          type: string
+        DailyLimit:
+          type: number
+      required:
+        - DocumentNumber
+        - DocumentType
+        - Currency
+        - DailyLimit
+        - Name
+        - LastName
+        - Email
+        - Phone
+    WalletSchemaIdResponse:
+      type: object
+      properties:
+        WalletId:
+          type: string
+          format: uuid
+      required:
+        - WalletId
+    WalletPatchSchemaRequest:
+      type: object
+      properties:
+        Name:
+          type: string
+        LastName:
+          type: string
+        DocumentNumber:
+          type: string
+        DocumentType:
+          type: string
+        Email:
+          type: string
+        Phone:
+          type: string
+        DailyLimit:
+          type: number
+      required:
+        - DocumentNumber
+        - DocumentType
+        - DailyLimit
+        - Name
+        - LastName
+        - Email
+        - Phone
+  responses: {}
+  securitySchemes: {}
+servers: []
+security: []

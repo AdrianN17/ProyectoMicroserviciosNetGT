@@ -1,0 +1,236 @@
+openapi: 3.0.1
+info:
+  title: proyecto_billetera
+  description: ''
+  version: 1.0.0
+tags: []
+paths:
+  /transaction:
+    post:
+      summary: Create Transaction
+      deprecated: false
+      description: ''
+      operationId: createTransaction
+      tags: []
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransactionSchemaRequest'
+            examples: {}
+        required: true
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionSchemaIdResponse'
+          headers: {}
+      security: []
+    get:
+      summary: Get Transactions
+      deprecated: false
+      description: ''
+      operationId: getTransactions
+      tags: []
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TransactionSchemaResponse'
+          headers: {}
+      security: []
+  /transaction/{transactionId}:
+    delete:
+      summary: Delete Transaction
+      deprecated: false
+      description: ''
+      operationId: deleteTransaction
+      tags: []
+      parameters:
+        - name: transactionId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: ''
+          headers: {}
+      security: []
+  /recharge:
+    post:
+      summary: Create Recharge
+      deprecated: false
+      description: ''
+      operationId: createRecharge
+      tags: []
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RechargeSchemaRequest'
+            examples: {}
+        required: true
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RechargeSchemaIdResponse'
+          headers: {}
+      security: []
+    get:
+      summary: Get Recharges
+      deprecated: false
+      description: ''
+      operationId: getRecharges
+      tags: []
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RechargeSchemaResponse'
+          headers: {}
+      security: []
+  /recharge/{rechargeId}:
+    delete:
+      summary: Delete Recharge
+      deprecated: false
+      description: ''
+      operationId: deleteRecharge
+      tags: []
+      parameters:
+        - name: rechargeId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: ''
+          headers: {}
+      security: []
+components:
+  schemas:
+    TransactionSchemaRequest:
+      type: object
+      properties:
+        FromWalletId:
+          type: string
+          format: uuid
+        ToWalletId:
+          type: string
+          format: uuid
+        Amount:
+          type: number
+        Currency:
+          type: string
+        SourceType:
+          type: string
+      required:
+        - SourceType
+        - FromWalletId
+        - ToWalletId
+        - Amount
+        - Currency
+    TransactionSchemaResponse:
+      type: object
+      properties:
+        PaymentId:
+          type: string
+          format: uuid
+        FromWalletId:
+          type: string
+          format: uuid
+        ToWalletId:
+          type: string
+          format: uuid
+        Amount:
+          type: number
+        Currency:
+          type: string
+        SourceType:
+          type: string
+      required:
+        - PaymentId
+        - SourceType
+        - FromWalletId
+        - ToWalletId
+        - Amount
+        - Currency
+    TransactionSchemaIdResponse:
+      type: object
+      properties:
+        TransactionId:
+          type: string
+          format: uuid
+      required:
+        - TransactionId
+    RechargeSchemaRequest:
+      type: object
+      properties:
+        WalletId:
+          type: string
+          format: uuid
+        Amount:
+          type: string
+        Currency:
+          type: string
+        MethodType:
+          type: string
+      required:
+        - WalletId
+        - Amount
+        - Currency
+        - MethodType
+    RechargeSchemaResponse:
+      type: object
+      properties:
+        RechargeId:
+          type: string
+          format: uuid
+        WalletId:
+          type: string
+          format: uuid
+        Amount:
+          type: string
+        Currency:
+          type: string
+        MethodType:
+          type: string
+      required:
+        - WalletId
+        - Amount
+        - Currency
+        - MethodType
+        - RechargeId
+    RechargeSchemaIdResponse:
+      type: object
+      properties:
+        RechargeId:
+          type: string
+          format: uuid
+      required:
+        - RechargeId
+  responses: {}
+  securitySchemes: {}
+servers: []
+security: []

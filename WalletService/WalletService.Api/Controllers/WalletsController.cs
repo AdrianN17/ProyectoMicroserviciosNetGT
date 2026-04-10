@@ -1,89 +1,74 @@
-﻿﻿using MediatR;
+﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using WalletService.Application.Wallets.Commands.CreateWallet;
-using WalletService.Application.Wallets.Commands.DeleteWallet;
+using WalletService.Api.Mapper;
+using WalletService.Api.Schema;
 using WalletService.Application.Wallets.Queries.GetByIdWallet;
-using WalletService.Application.Wallets.Commands.UpdateWallet;
-using WalletService.Application.Wallets.Queries.GetLimitByIdWalletLimit;
-using WalletService.Application.Wallets.Queries.GetInformationByWallet;
 
-namespace WalletService.Api.Controllers
+namespace WalletService.Api.Controllers;
+
+[Route("api/wallets")]
+[ApiController]
+public class WalletsController(IMediator mediator) : ControllerBase
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class WalletsController(IMediator mediator) : ControllerBase
+    // POST /wallets
+    [HttpPost(Name = "Wallet_Create")]
+    [ProducesResponseType(typeof(WalletSchemaIdResponse), StatusCodes.Status200OK)]
+    public async Task<IActionResult> Create(
+        [FromBody] WalletSchemaRequest request,
+        CancellationToken cancellationToken)
     {
-        [HttpPost(Name = "Wallet_Create")]
-        public async Task<IActionResult> Create(CreateWalletCommand command, CancellationToken cancellationToken)
-        {
-            var result = await mediator.Send(command, cancellationToken);
+        var result = await mediator.Send(request.ToCreateWalletCommand(), cancellationToken);
 
-            return result.Match(
-                walletId => CreatedAtAction(nameof(GetById), new { walletId }, new { walletId }),
-                errors => ErrorOrHttp.MapToProblem(this, errors)
-            );
-        }
+        return result.Match(
+            walletId => Ok(walletId.ToSchemaIdResponse()),
+            errors   => ErrorOrHttp.MapToProblem(this, errors)
+        );
+    }
 
-        [HttpGet("{walletId:guid}", Name = "Wallet_GetById")]
-        public async Task<IActionResult> GetById(Guid walletId)
-        {
-            var result = await mediator.Send(new GetByIdWalletQuery(walletId));
+    // GET /wallets/{walletId}
+    [HttpGet("{walletId:guid}", Name = "Wallet_GetById")]
+    [ProducesResponseType(typeof(WalletSchemaResponse), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetById(
+        [FromRoute] Guid walletId,
+        CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(new GetByIdWalletQuery(walletId), cancellationToken);
 
-            await Task.Delay(6);
+        return result.Match(
+            dto    => Ok(dto.ToSchemaResponse()),
+            errors => ErrorOrHttp.MapToProblem(this, errors)
+        );
+    }
 
-            return result.Match(
-                Ok,
-                errors => ErrorOrHttp.MapToProblem(this, errors)
-            );
-        }
-        
-        [HttpPatch("{walletId:guid}", Name = "Wallet_Update")]
-        public async Task<IActionResult> Update(Guid walletId, UpdateWalletCommand command, CancellationToken cancellationToken)
-        {
-            var commandWithId = command with { WalletId = walletId };
-            var result = await mediator.Send(commandWithId, cancellationToken);
-            
-            return result.Match(
-                walletId => CreatedAtAction(nameof(GetById), new { walletId }, new { walletId }),
-                errors => ErrorOrHttp.MapToProblem(this, errors)
-            );
-        }
-        
-        [HttpDelete("{walletId:guid}", Name = "Wallet_Delete")]
-        public async Task<IActionResult> DeleteById(Guid walletId)
-        {
-            var result = await mediator.Send(new DeleteWalletCommand(walletId));
+    // PATCH /wallets/{walletId}
+    [HttpPatch("{walletId:guid}", Name = "Wallet_Update")]
+    [ProducesResponseType(typeof(WalletSchemaIdResponse), StatusCodes.Status200OK)]
+    public async Task<IActionResult> Update(
+        [FromRoute] Guid walletId,
+        [FromBody] WalletPatchSchemaRequest request,
+        CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(request.ToUpdateWalletCommand(walletId), cancellationToken);
 
-            await Task.Delay(6);
+        return result.Match(
+            id     => Ok(id.ToSchemaIdResponse()),
+            errors => ErrorOrHttp.MapToProblem(this, errors)
+        );
+    }
 
-            return result.Match(
-                _ => NoContent(),
-                errors => ErrorOrHttp.MapToProblem(this, errors)
-            );
-        }
-        
-        [HttpGet("limit/{walletId:guid}", Name = "WalletLimit_GetById")]
-        public async Task<IActionResult> GetWalletLmitById(Guid walletId)
-        {
-            var result = await mediator.Send(new GetByIdWalletLimitQuery(walletId));
+    // DELETE /wallets/{walletId}
+    [HttpDelete("{walletId:guid}", Name = "Wallet_Delete")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public async Task<IActionResult> Delete(
+        [FromRoute] Guid walletId,
+        CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(walletId.ToDeleteWalletCommand(), cancellationToken);
 
-            await Task.Delay(6);
-
-            return result.Match(
-                Ok,
-                errors => ErrorOrHttp.MapToProblem(this, errors)
-            );
-        }
-
-        [HttpGet("information/{walletId:guid}", Name = "WalletInformation_GetById")]
-        public async Task<IActionResult> GetWalletInformationById(Guid walletId, CancellationToken cancellationToken)
-        {
-            var result = await mediator.Send(new GetInformationByWalletQuery(walletId), cancellationToken);
-
-            return result.Match(
-                Ok,
-                errors => ErrorOrHttp.MapToProblem(this, errors)
-            );
-        }
+        return result.Match(
+            _ =>      NoContent(),
+            errors => ErrorOrHttp.MapToProblem(this, errors)
+        );
     }
 }
+

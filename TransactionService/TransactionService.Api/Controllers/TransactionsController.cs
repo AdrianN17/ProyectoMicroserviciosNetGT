@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 using TransactionService.Application.Transactions.Commands.CreateTransaction;
 using TransactionService.Application.Transactions.Commands.DeleteTransaction;
 using TransactionService.Application.Transactions.Queries.GetAllByFromWalletId;
-using TransactionService.Application.Transactions.Queries.GetAllById;
 
 namespace TransactionService.Api.Controllers
 {
@@ -17,21 +16,11 @@ namespace TransactionService.Api.Controllers
             var result = await mediator.Send(command, cancellationToken);
 
             return result.Match(
-                transactionId => CreatedAtAction(nameof(GetById), new { transactionId }, new { transactionId }),
+                transactionId => CreatedAtAction(nameof(Create), new { transactionId }, new { transactionId }),
                 errors => ErrorOrHttp.MapToProblem(this, errors)
             );
         }
-
-        [HttpGet("{transactionId:guid}", Name = "Transaction_GetById")]
-        public async Task<IActionResult> GetById(Guid transactionId, CancellationToken cancellationToken)
-        {
-            var result = await mediator.Send(new GetByIdTransactionQuery(transactionId), cancellationToken);
-
-            return result.Match(
-                Ok,
-                errors => ErrorOrHttp.MapToProblem(this, errors)
-            );
-        }
+        
 
         [HttpDelete("{transactionId:guid}", Name = "Transaction_Delete")]
         public async Task<IActionResult> DeleteById(Guid transactionId, CancellationToken cancellationToken)
