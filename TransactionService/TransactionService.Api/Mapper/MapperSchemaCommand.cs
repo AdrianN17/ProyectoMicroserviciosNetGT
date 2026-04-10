@@ -3,7 +3,7 @@ using TransactionService.Application.Transactions.Commands.CreateTransaction;
 using TransactionService.Application.Transactions.Commands.DeleteRecharge;
 using TransactionService.Application.Transactions.Commands.DeleteTransaction;
 using TransactionService.Application.Transactions.Dtos;
-using WalletService.Client;
+using TransactionService.Api.Schema;
 
 namespace TransactionService.Api.Mapper;
 

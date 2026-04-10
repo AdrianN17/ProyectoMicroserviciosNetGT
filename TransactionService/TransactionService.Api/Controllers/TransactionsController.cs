@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using TransactionService.Api.Mapper;
 using TransactionService.Application.Transactions.Queries.GetAllByFromWalletId;
-using WalletService.Client;
+using TransactionService.Api.Schema;
 
 namespace TransactionService.Api.Controllers
 {
