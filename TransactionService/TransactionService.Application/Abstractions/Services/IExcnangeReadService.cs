@@ -1,4 +1,4 @@
-﻿using TransactionService.Application.Transactions.Dtos;
+﻿using TransactionService.Application.Exchange.Dtos;
 
 namespace TransactionService.Application.Abstractions.Services;
 

@@ -1,8 +1,8 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using TransactionService.Application.Transactions.Commands.CreateTransaction;
-using TransactionService.Application.Transactions.Commands.DeleteTransaction;
+using TransactionService.Api.Mapper;
 using TransactionService.Application.Transactions.Queries.GetAllByFromWalletId;
+using WalletService.Client;
 
 namespace TransactionService.Api.Controllers
 {
@@ -11,21 +11,20 @@ namespace TransactionService.Api.Controllers
     public class TransactionsController(IMediator mediator) : ControllerBase
     {
         [HttpPost(Name = "Transaction_Create")]
-        public async Task<IActionResult> Create(CreateTransactionCommand command, CancellationToken cancellationToken)
+        public async Task<IActionResult> Create([FromBody] TransactionSchemaRequest schema, CancellationToken cancellationToken)
         {
-            var result = await mediator.Send(command, cancellationToken);
+            var result = await mediator.Send(schema.ToCommand(), cancellationToken);
 
             return result.Match(
-                transactionId => CreatedAtAction(nameof(Create), new { transactionId }, new { transactionId }),
+                transactionId => Ok(transactionId.ToTransactionIdResponse()),
                 errors => ErrorOrHttp.MapToProblem(this, errors)
             );
         }
-        
 
         [HttpDelete("{transactionId:guid}", Name = "Transaction_Delete")]
         public async Task<IActionResult> DeleteById(Guid transactionId, CancellationToken cancellationToken)
         {
-            var result = await mediator.Send(new DeleteTransactionCommand(transactionId), cancellationToken);
+            var result = await mediator.Send(transactionId.ToDeleteTransactionCommand(), cancellationToken);
 
             return result.Match(
                 _ => NoContent(),
@@ -39,10 +38,9 @@ namespace TransactionService.Api.Controllers
             var result = await mediator.Send(new GetAllByFromWalletIdTransactionQuery(fromWalletId), cancellationToken);
 
             return result.Match(
-                Ok,
+                transactions => Ok(transactions.Select(t => t.ToResponse())),
                 errors => ErrorOrHttp.MapToProblem(this, errors)
             );
         }
     }
 }
-

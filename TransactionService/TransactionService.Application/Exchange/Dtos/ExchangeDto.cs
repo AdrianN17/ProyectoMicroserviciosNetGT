@@ -1,4 +1,4 @@
-﻿namespace TransactionService.Application.Transactions.Dtos;
+﻿namespace TransactionService.Application.Exchange.Dtos;
 
 public record ExchangeDto(
     string currency,

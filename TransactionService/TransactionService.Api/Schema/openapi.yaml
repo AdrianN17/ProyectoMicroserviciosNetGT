@@ -29,24 +29,6 @@ paths:
                 $ref: '#/components/schemas/TransactionSchemaIdResponse'
           headers: {}
       security: []
-    get:
-      summary: Get Transactions
-      deprecated: false
-      description: ''
-      operationId: getTransactions
-      tags: []
-      parameters: []
-      responses:
-        '200':
-          description: ''
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/TransactionSchemaResponse'
-          headers: {}
-      security: []
   /transaction/{transactionId}:
     delete:
       summary: Delete Transaction
@@ -65,6 +47,32 @@ paths:
       responses:
         '204':
           description: ''
+          headers: {}
+      security: []
+  /transaction/wallet/{walletId}:
+    get:
+      summary: Get Transactions
+      deprecated: false
+      description: ''
+      operationId: getTransactions
+      tags: []
+      parameters:
+        - name: walletId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TransactionSchemaResponse'
           headers: {}
       security: []
   /recharge:
@@ -91,24 +99,6 @@ paths:
                 $ref: '#/components/schemas/RechargeSchemaIdResponse'
           headers: {}
       security: []
-    get:
-      summary: Get Recharges
-      deprecated: false
-      description: ''
-      operationId: getRecharges
-      tags: []
-      parameters: []
-      responses:
-        '200':
-          description: ''
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/RechargeSchemaResponse'
-          headers: {}
-      security: []
   /recharge/{rechargeId}:
     delete:
       summary: Delete Recharge
@@ -126,6 +116,32 @@ paths:
       responses:
         '204':
           description: ''
+          headers: {}
+      security: []
+  /recharge/wallet/{walletId}:
+    get:
+      summary: Get Recharges
+      deprecated: false
+      description: ''
+      operationId: getRecharges
+      tags: []
+      parameters:
+        - name: walletId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RechargeSchemaResponse'
           headers: {}
       security: []
 components:
@@ -191,7 +207,7 @@ components:
           type: string
           format: uuid
         Amount:
-          type: string
+          type: number
         Currency:
           type: string
         MethodType:
@@ -211,7 +227,7 @@ components:
           type: string
           format: uuid
         Amount:
-          type: string
+          type: number
         Currency:
           type: string
         MethodType:

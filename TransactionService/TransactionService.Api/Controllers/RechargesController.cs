@@ -1,8 +1,8 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using TransactionService.Api.Mapper;
 using TransactionService.Application.Recharge.Queries.GetAllByWalletId;
-using TransactionService.Application.Transactions.Commands.CreateRecharge;
-using TransactionService.Application.Transactions.Commands.DeleteRecharge;
+using WalletService.Client;
 
 namespace TransactionService.Api.Controllers
 {
@@ -11,12 +11,12 @@ namespace TransactionService.Api.Controllers
     public class RechargesController(IMediator mediator) : ControllerBase
     {
         [HttpPost(Name = "Recharge_Create")]
-        public async Task<IActionResult> Create(CreateRechargeCommand command, CancellationToken cancellationToken)
+        public async Task<IActionResult> Create([FromBody] RechargeSchemaRequest schema, CancellationToken cancellationToken)
         {
-            var result = await mediator.Send(command, cancellationToken);
+            var result = await mediator.Send(schema.ToCommand(), cancellationToken);
 
             return result.Match(
-                rechargeId => CreatedAtAction(nameof(Create), new { rechargeId }, new { rechargeId }),
+                rechargeId => Ok(rechargeId.ToRechargeIdResponse()),
                 errors => ErrorOrHttp.MapToProblem(this, errors)
             );
         }
@@ -24,7 +24,7 @@ namespace TransactionService.Api.Controllers
         [HttpDelete("{rechargeId:guid}", Name = "Recharge_Delete")]
         public async Task<IActionResult> DeleteById(Guid rechargeId, CancellationToken cancellationToken)
         {
-            var result = await mediator.Send(new DeleteRechargeCommand(rechargeId), cancellationToken);
+            var result = await mediator.Send(rechargeId.ToDeleteRechargeCommand(), cancellationToken);
 
             return result.Match(
                 _ => NoContent(),
@@ -38,10 +38,9 @@ namespace TransactionService.Api.Controllers
             var result = await mediator.Send(new GetAllByWalletIdRechargeQuery(walletId), cancellationToken);
 
             return result.Match(
-                Ok,
+                recharges => Ok(recharges.Select(r => r.ToResponse())),
                 errors => ErrorOrHttp.MapToProblem(this, errors)
             );
         }
     }
 }
-

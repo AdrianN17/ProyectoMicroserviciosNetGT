@@ -1,7 +1,6 @@
 ﻿using System.Net.Http.Json;
 using TransactionService.Application.Abstractions.Services;
-using TransactionService.Application.Transactions.Dtos;
-using TransactionService.Application.Wallets.Dtos;
+using TransactionService.Application.Exchange.Dtos;
 using TransactionService.Domain.Enums;
 
 namespace TransactionService.Infrastructure.Services;
