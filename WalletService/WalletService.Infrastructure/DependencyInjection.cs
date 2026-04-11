@@ -39,7 +39,6 @@ namespace WalletService.Infrastructure
             {
                 var secrets = sp.GetRequiredService<ISecretProvider>();
                 var connectionString = secrets.GetSecretAsync("WalletSqlServerConnection").GetAwaiter().GetResult();
-
                 if (connectionString is null) {
                     throw new InvalidOperationException("Connection string for CustomerSqlServerConnection is not configured in Vault");
                 }

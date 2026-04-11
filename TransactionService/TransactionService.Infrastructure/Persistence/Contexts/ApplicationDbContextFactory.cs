@@ -10,15 +10,13 @@ namespace TransactionService.Infrastructure.Persistence.Contexts
         {
             var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
 
-            var endpoint     = Environment.GetEnvironmentVariable("COSMOS_ENDPOINT")
-                               ?? throw new InvalidOperationException("COSMOS_ENDPOINT not configured");
-            var accountKey   = Environment.GetEnvironmentVariable("COSMOS_KEY")
-                               ?? throw new InvalidOperationException("COSMOS_KEY not configured");
-            var databaseName = Environment.GetEnvironmentVariable("COSMOS_DATABASE")
-                               ?? "TransactionServiceCosmosDb";
+            var connectionString = Environment.GetEnvironmentVariable("COSMOS_CONNECTION")
+                                   ?? throw new InvalidOperationException("COSMOS_CONNECTION not configured");
+            var databaseName     = Environment.GetEnvironmentVariable("COSMOS_DATABASE")
+                                   ?? throw new InvalidOperationException("COSMOS_DATABASE not configured");
 
             optionsBuilder
-                .UseCosmos(endpoint, accountKey, databaseName)
+                .UseCosmos(connectionString, databaseName)
                 .EnableSensitiveDataLogging();
 
             return new ApplicationDbContext(optionsBuilder.Options, new NoOpPublisher());

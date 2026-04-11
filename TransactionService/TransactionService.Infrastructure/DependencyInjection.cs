@@ -46,15 +46,13 @@ namespace TransactionService.Infrastructure
         {
             services.AddDbContext<ApplicationDbContext>((sp, options) =>
             {
-                var secrets      = sp.GetRequiredService<ISecretProvider>();
-                var endpoint     = secrets.GetSecretAsync("CosmosEndpoint").GetAwaiter().GetResult()
-                                   ?? throw new InvalidOperationException("Secret 'CosmosEndpoint' is not configured.");
-                var accountKey   = secrets.GetSecretAsync("CosmosAccountKey").GetAwaiter().GetResult()
-                                   ?? throw new InvalidOperationException("Secret 'CosmosAccountKey' is not configured.");
-                var databaseName = configuration.GetValue<string>("CosmosDatabaseName")
-                                   ?? throw new InvalidOperationException("Secret 'CosmosDatabaseName' is not configured.");
+                var secrets           = sp.GetRequiredService<ISecretProvider>();
+                var connectionString  = secrets.GetSecretAsync("CosmosConnection").GetAwaiter().GetResult()
+                                        ?? throw new InvalidOperationException("Secret 'CosmosConnection' is not configured.");
+                var databaseName      = configuration.GetValue<string>("CosmosDatabaseName")
+                                        ?? throw new InvalidOperationException("Configuration 'CosmosDatabaseName' is not configured.");
 
-                options.UseCosmos(endpoint, accountKey, databaseName);
+                options.UseCosmos(connectionString, databaseName);
             });
             
             services.AddScoped<ITransactionRepository, TransactionRepository>();
