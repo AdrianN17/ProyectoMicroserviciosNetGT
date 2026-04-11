@@ -32,7 +32,7 @@ public static class MapperSchemaCommand
             DocumentNumber: request.DocumentNumber,
             Email:          request.Email,
             Phone:          request.Phone,
-            DailyLimit:     (decimal)request.DailyLimit
+            DailyLimit:     request.DailyLimit is {} d ? (decimal)d : null
         );
 
     // ── Guid → DeleteWalletCommand ────────────────────────────────

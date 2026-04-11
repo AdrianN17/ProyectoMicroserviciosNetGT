@@ -19,6 +19,7 @@
 #pragma warning disable 8604 // Disable "CS8604 Possible null reference argument for parameter"
 #pragma warning disable 8625 // Disable "CS8625 Cannot convert null literal to non-nullable reference type"
 #pragma warning disable 8765 // Disable "CS8765 Nullability of type of parameter doesn't match overridden member (possibly because of nullability attributes)."
+#pragma warning disable 8632 // Disable "CS8632 The annotation for nullable reference types should only be used in code within a '#nullable' annotations context."
 
 namespace WalletService.Api.Schema
 {
@@ -149,31 +150,25 @@ namespace WalletService.Api.Schema
     {
 
         [System.Text.Json.Serialization.JsonPropertyName("Name")]
-        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
-        public string Name { get; set; }
+        public string? Name { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("LastName")]
-        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
-        public string LastName { get; set; }
+        public string? LastName { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("DocumentNumber")]
-        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
-        public string DocumentNumber { get; set; }
+        public string? DocumentNumber { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("DocumentType")]
-        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
-        public string DocumentType { get; set; }
+        public string? DocumentType { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("Email")]
-        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
-        public string Email { get; set; }
+        public string? Email { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("Phone")]
-        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
-        public string Phone { get; set; }
+        public string? Phone { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("DailyLimit")]
-        public double DailyLimit { get; set; }
+        public double? DailyLimit { get; set; }
 
         private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
 
@@ -240,3 +235,4 @@ namespace WalletService.Api.Schema
 #pragma warning restore 8604
 #pragma warning restore 8625
 #pragma warning restore 8765
+#pragma warning restore 8632
