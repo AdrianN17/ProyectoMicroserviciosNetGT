@@ -37,10 +37,12 @@ public sealed class DeleteRechargeCommandHandler : IRequestHandler<DeleteRecharg
         
         var rechargeId = new RechargeId(request.RechargeId);
         var recharge = await _rechargeRepository.GetByIdAsync(rechargeId, cancellationToken);
-        if(recharge is null) throw new InvalidOperationException("La Recarga no existo o esta inactivo");
+        if (recharge is null)
+            return Error.NotFound(code: "Recharge.NotFound", description: $"La Recarga '{request.RechargeId}' no existe o ya fue eliminada.");
         
         var wallet = await _walletReadService.GetByIdAsync(recharge.WalletId.Value, cancellationToken);
-        if(wallet is null) throw new InvalidOperationException("La Wallet no existo o esta inactivo");
+        if (wallet is null)
+            return Error.NotFound(code: "Wallet.NotFound", description: $"La Wallet '{recharge.WalletId.Value}' no existe o está inactiva.");
         
         if (!EnumParsing.TryParseEnum<CurrencyType>(wallet.Currency, out var walletCurrency))
             return Error.Validation(code: "CurrencyType.Invalid", description: $"CurrencyType of Wallet '{wallet.Currency}' no es válido.");

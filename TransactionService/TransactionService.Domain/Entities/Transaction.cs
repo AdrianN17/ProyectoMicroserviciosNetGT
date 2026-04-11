@@ -1,9 +1,4 @@
-﻿using TransactionService.Domain.Common;
-using TransactionService.Domain.Enums;
-using TransactionService.Domain.Exceptions;
-using TransactionService.Domain.ValueObjects;
-
-namespace TransactionService.Domain.Entities;
+﻿namespace TransactionService.Domain.Entities;
 
 public class Transaction : AggregateRoot<TransactionId>
 {
@@ -143,14 +138,17 @@ public class Transaction : AggregateRoot<TransactionId>
     public void ValidateIfTransactionHaveLimit(decimal limit, decimal amountTransactions, CurrencyType currency)
     {
         if (amountTransactions + TotalCalculated(currency) > limit)
-            throw new InvalidOperationException("El monto de transferencia excede el límite diario permitido para la wallet.");
-        
+            throw new BusinessRuleViolationException(
+                "transaction.limit_exceeded",
+                "El monto de transferencia excede el límite diario permitido para la wallet.");
     }
     
     public void TotalCalculatedToWalletFrom(decimal amount, CurrencyType currency)
     {
-        if(TotalCalculated(Amount.Currency) < amount)
-            throw new InvalidOperationException("El monto de transferencia no puede ser mayor al balance actual de la wallet.");
+        if (amount < TotalCalculated(currency))
+            throw new BusinessRuleViolationException(
+                "transaction.insufficient_balance",
+                "El monto de transferencia no puede ser mayor al balance actual de la wallet.");
     }
     
     public void SoftDelete()

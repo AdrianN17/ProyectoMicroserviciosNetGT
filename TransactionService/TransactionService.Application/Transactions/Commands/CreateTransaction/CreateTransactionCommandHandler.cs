@@ -30,7 +30,7 @@ public sealed class CreateTransactionCommandHandler : IRequestHandler<CreateTran
     
     public async Task<ErrorOr<Guid>> Handle(CreateTransactionCommand request, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Creating transaction from {FromWalletId} to {ToWalletId}", request.ToWalletId, request.ToWalletId);
+        _logger.LogInformation("Creating transaction from {FromWalletId} to {ToWalletId}", request.FromWalletId, request.ToWalletId);
         
         var walletFrom = await _walletReadService.GetByIdAsync(request.FromWalletId, cancellationToken);
         if(walletFrom is null) throw new InvalidOperationException("La Wallet origen no existo o esta inactivo");
