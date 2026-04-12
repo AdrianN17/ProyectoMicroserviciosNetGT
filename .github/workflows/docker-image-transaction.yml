@@ -1,9 +1,7 @@
 name: Docker Image CI Transaction
 
 on:
-  push:
-    branches: [  ]
-
+  workflow_dispatch:
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
