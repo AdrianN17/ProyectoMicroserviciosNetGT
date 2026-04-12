@@ -1,0 +1,38 @@
+name: Docker Image CI Transaction
+
+on:
+  push:
+    branches: [  ]
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    # Login en Azure
+    - name: Azure Login
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    # Login al ACR
+    - name: Login to ACR
+      run: |
+        az acr login --name ${{ secrets.ACR_NAME }}
+
+    # Build + Tag
+    - name: Build Docker image
+      run: |
+        IMAGE_NAME=${{ secrets.ACR_NAME }}.azurecr.io/transactionservice
+        TAG=${{ github.sha }}
+        docker build -t $IMAGE_NAME:$TAG ./TransactionService
+
+    # Push
+    - name: Push Docker image
+      run: |
+        IMAGE_NAME=${{ secrets.ACR_NAME }}.azurecr.io/transactionservice
+        TAG=${{ github.sha }}
+        docker push $IMAGE_NAME:$TAG
