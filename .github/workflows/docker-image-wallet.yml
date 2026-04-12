@@ -2,7 +2,7 @@ name: Docker Image CI Wallet
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [  ]
 
 jobs:
   build-and-push:
