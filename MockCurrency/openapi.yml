@@ -1,0 +1,50 @@
+openapi: 3.0.3
+info:
+  title: MockCurrency API
+  description: Mock API for currency conversion between USD and PEN.
+  version: 1.0.0
+
+paths:
+  /convert/currency/USD:
+    get:
+      summary: Convert USD to PEN
+      description: Returns the equivalent value of 1 USD in PEN.
+      responses:
+        '200':
+          description: Successful conversion
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConversionResult'
+              example:
+                currency: PEN
+                value: "3.35"
+
+  /convert/currency/PEN:
+    get:
+      summary: Convert PEN to USD
+      description: Returns the equivalent value of 1 PEN in USD.
+      responses:
+        '200':
+          description: Successful conversion
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConversionResult'
+              example:
+                currency: USD
+                value: "0.298"
+
+components:
+  schemas:
+    ConversionResult:
+      type: object
+      properties:
+        currency:
+          type: string
+          description: Target currency code.
+          example: PEN
+        value:
+          type: string
+          description: Exchange rate value.
+          example: "3.35"
