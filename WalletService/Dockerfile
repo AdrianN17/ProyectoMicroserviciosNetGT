@@ -32,7 +32,7 @@ WORKDIR /app
 
 COPY --from=publish /app/publish .
 
-# Puerto expuesto (ajústalo si usas otro)
+ENV ASPNETCORE_URLS=http://+:8080
 EXPOSE 8080
 
 ENTRYPOINT ["dotnet", "WalletService.Api.dll"]

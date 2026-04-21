@@ -14,13 +14,27 @@ var appConfigEndpoint = builder.Configuration["AzureAppConfiguration:Endpoint"]
 builder.Configuration.AddAzureAppConfiguration(options =>
 {
     options
-        .Connect(new Uri(appConfigEndpoint), new DefaultAzureCredential())
+        .Connect(new Uri(appConfigEndpoint), new DefaultAzureCredential(new DefaultAzureCredentialOptions
+    {
+        ExcludeEnvironmentCredential = true,
+        ExcludeVisualStudioCredential = true,
+        ExcludeVisualStudioCodeCredential = true,
+        ExcludeAzureCliCredential = true,
+        ExcludeAzurePowerShellCredential = true
+    }))
         // Carga todas las claves (sin prefijo o ajusta el selector según tu convención)
         .Select(KeyFilter.Any)
         // Resuelve Key Vault references automáticamente con la misma identidad
         .ConfigureKeyVault(kv =>
         {
-            kv.SetCredential(new DefaultAzureCredential());
+            kv.SetCredential(new DefaultAzureCredential(new DefaultAzureCredentialOptions
+            {
+                ExcludeEnvironmentCredential = true,
+                ExcludeVisualStudioCredential = true,
+                ExcludeVisualStudioCodeCredential = true,
+                ExcludeAzureCliCredential = true,
+                ExcludeAzurePowerShellCredential = true
+            }));
         });
 });
 

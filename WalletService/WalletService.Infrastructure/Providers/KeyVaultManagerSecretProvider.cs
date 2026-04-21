@@ -14,7 +14,14 @@ namespace WalletService.Infrastructure.Providers
 
         public KeyVaultManagerSecretProvider(KeyVaultOptions options, InMemorySecretCache cache)
         {
-            _client = new SecretClient(new Uri(options.VaultUrl), new DefaultAzureCredential());
+            _client = new SecretClient(new Uri(options.VaultUrl), new DefaultAzureCredential(new DefaultAzureCredentialOptions
+            {
+                ExcludeEnvironmentCredential = true,
+                ExcludeVisualStudioCredential = true,
+                ExcludeVisualStudioCodeCredential = true,
+                ExcludeAzureCliCredential = true,
+                ExcludeAzurePowerShellCredential = true
+            }));
             _cache = cache;
         }
 
