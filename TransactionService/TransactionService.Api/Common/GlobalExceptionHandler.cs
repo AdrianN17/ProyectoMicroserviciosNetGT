@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
+using Polly.Timeout;
 
 namespace TransactionService.Api.Common
 {
@@ -104,6 +105,18 @@ namespace TransactionService.Api.Common
                             Detail = nfex.Message
                         };
                         problem.Extensions["code"] = nfex.Code;
+                        break;
+                    }
+                case TimeoutRejectedException:
+                    {
+                        httpContext.Response.StatusCode = StatusCodes.Status400BadRequest;
+                        problem = new ProblemDetails
+                        {
+                            Title = "Request timeout",
+                            Status = StatusCodes.Status400BadRequest,
+                            Type = "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+                            Detail = "El servicio externo no respondió a tiempo. Intente nuevamente."
+                        };
                         break;
                     }
                 default:
